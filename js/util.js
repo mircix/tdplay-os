@@ -137,31 +137,61 @@ window.TD = window.TD || {};
   };
 
   // ---------------------------------------------------------------- icons
-  var G = function (id, c1, c2) { return '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs>'; };
-  var tile = function (id, c1, c2, inner) {
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' + G(id, c1, c2) +
-      '<rect x="2" y="2" width="60" height="60" rx="15" fill="url(#' + id + ')"/>' +
-      '<rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.25)"/>' +
-      '<path d="M12 2h40a10 10 0 0 1 10 10v6H2v-6A10 10 0 0 1 12 2z" fill="rgba(255,255,255,.12)"/>' + inner + "</svg>";
+  // ---- app icons: real brand marks (YouTube / Spotify / Apple Music glyph geometry from Simple Icons, CC0)
+  //      and macOS-style tiles for the system apps. 64x64, rounded like an iOS icon.
+  var YT_PATH = "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z";
+  var SP_PATH = "M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.6.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z";
+  var AM_PATH = "M18.7 2.5v13.1a3.4 3.4 0 1 1-2-3.1V6.7L9.3 8.3v9.3a3.4 3.4 0 1 1-2-3.1V5.4a1 1 0 0 1 .8-1l9.4-2.1a1 1 0 0 1 1.2 1z";
+  var SVG64 = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
+  var tile = function (id, stops, inner, angle) {
+    var grad = '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="' + (angle === "v" ? "0" : "1") + '" y2="1">' +
+      stops.map(function (st, i) { return '<stop offset="' + (i / Math.max(1, stops.length - 1)) + '" stop-color="' + st + '"/>'; }).join("") + "</linearGradient></defs>";
+    return SVG64 + grad + '<rect x="0" y="0" width="64" height="64" rx="14.5" fill="url(#' + id + ')"/>' + inner +
+      '<rect x=".5" y=".5" width="63" height="63" rx="14" fill="none" stroke="rgba(0,0,0,.35)"/></svg>';
   };
+  var poly = function (n, r, cx, cy, fn) { var o = []; for (var i = 0; i < n; i++) o.push(fn(i * Math.PI * 2 / n, r, cx, cy)); return o.join(""); };
+  // Safari compass: 72 ticks round the dial, needle red north-east / white south-west
+  var safariTicks = poly(72, 23, 32, 32, function (a, r, cx, cy) {
+    var long = (Math.round(a / (Math.PI * 2) * 72) % 6) === 0, r0 = long ? r - 4 : r - 2;
+    return '<line x1="' + (cx + Math.cos(a) * r0).toFixed(1) + '" y1="' + (cy + Math.sin(a) * r0).toFixed(1) + '" x2="' + (cx + Math.cos(a) * r).toFixed(1) + '" y2="' + (cy + Math.sin(a) * r).toFixed(1) + '" stroke="#fff" stroke-width="' + (long ? 1.2 : .7) + '" stroke-opacity=".9"/>';
+  });
+  var gear = (function () { var pts = []; for (var i = 0; i < 16; i++) { var a = i * Math.PI / 8, r = i % 2 ? 22 : 17; for (var k = -1; k <= 1; k += 2) { var aa = a + k * (i % 2 ? .13 : .2); pts.push((32 + Math.cos(aa) * r).toFixed(1) + "," + (32 + Math.sin(aa) * r).toFixed(1)); } } return pts; })();
   TD.icons = {
-    home: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0b0b12" stroke="rgba(255,255,255,.22)"/><image href="assets/logo.png" x="6" y="6" width="52" height="52" preserveAspectRatio="xMidYMid slice" clip-path="inset(0 round 12px)"/></svg>',
-    library: tile("gLib", "#2a2a3d", "#101018", '<rect x="14" y="16" width="14" height="14" rx="3" fill="#b1ffff"/><rect x="36" y="16" width="14" height="14" rx="3" fill="#ff5cf0"/><rect x="14" y="36" width="14" height="14" rx="3" fill="#ffd166"/><rect x="36" y="36" width="14" height="14" rx="3" fill="#ff2b2b"/>'),
-    player: tile("gPl", "#ff3b3b", "#a10d1c", '<circle cx="32" cy="32" r="18" fill="rgba(0,0,0,.28)"/><path d="M27 22l14 10-14 10z" fill="#fff"/>'),
-    spotify: tile("gSp", "#1ed760", "#0f7a37", '<circle cx="32" cy="32" r="20" fill="#0b0b12"/><path d="M20 27.5c8-2.5 17-1.5 24 3M22 33.5c6.5-2 13.5-1 19 2.5M24 39c5-1.5 10-.8 14 1.7" fill="none" stroke="#1ed760" stroke-width="3.2" stroke-linecap="round"/>'),
-    apple: tile("gAp", "#fc5c7d", "#c0153e", '<path d="M39 17l-13 3v22a6 6 0 1 1-4-5.5V22.5l17-4V38a6 6 0 1 1-4-5.5z" fill="#fff"/>'),
-    artists: tile("gAr", "#5b5bff", "#1f1f8a", '<circle cx="32" cy="32" r="16" fill="none" stroke="#fff" stroke-width="3"/><path d="M16 32h32M32 16c6 6 6 26 0 32M32 16c-6 6-6 26 0 32" fill="none" stroke="#fff" stroke-width="2.4"/>'),
-    browser: tile("gBr", "#40e0d0", "#12706a", '<rect x="14" y="16" width="36" height="32" rx="6" fill="#0b0b12"/><rect x="14" y="16" width="36" height="9" rx="4" fill="rgba(255,255,255,.2)"/><circle cx="19" cy="20.5" r="1.6" fill="#ff5f57"/><circle cx="24" cy="20.5" r="1.6" fill="#febc2e"/><circle cx="29" cy="20.5" r="1.6" fill="#28c840"/><path d="M22 34h20M22 40h13" stroke="#40e0d0" stroke-width="2.5" stroke-linecap="round"/>'),
-    terminal: tile("gTe", "#2b2b38", "#0a0a10", '<path d="M18 22l10 10-10 10" fill="none" stroke="#1ed760" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 42h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/>'),
-    stats: tile("gSt", "#ffd166", "#c47f00", '<rect x="16" y="34" width="8" height="14" rx="2" fill="#0b0b12"/><rect x="28" y="24" width="8" height="24" rx="2" fill="#0b0b12"/><rect x="40" y="16" width="8" height="32" rx="2" fill="#0b0b12"/>'),
-    settings: tile("gSe", "#8e8ea0", "#3a3a48", '<circle cx="32" cy="32" r="8" fill="none" stroke="#fff" stroke-width="3.5"/><path d="M32 12v7M32 45v7M12 32h7M45 32h7M18 18l5 5M41 41l5 5M18 46l5-5M41 23l5-5" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>'),
-    radio: tile("gRa", "#ff5cf0", "#7a1a80", '<circle cx="32" cy="32" r="6" fill="#fff"/><path d="M22 22a14 14 0 0 0 0 20M42 22a14 14 0 0 1 0 20M16 16a22 22 0 0 0 0 32M48 16a22 22 0 0 1 0 32" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'),
-    about: tile("gAb", "#ff2b2b", "#2a0a10", '<text x="32" y="43" text-anchor="middle" font-family="Oswald,Impact,sans-serif" font-size="30" fill="#fff">TD</text>'),
-    keepup: tile("gKu", "#ff2b2b", "#5a0a12", '<rect x="16" y="20" width="32" height="24" rx="6" fill="#fff"/><path d="M29 26l9 6-9 6z" fill="#ff2b2b"/>'),
+    home: SVG64 + '<rect x="0" y="0" width="64" height="64" rx="14.5" fill="#0b0b12"/><image href="assets/logo.png" x="4" y="4" width="56" height="56" preserveAspectRatio="xMidYMid slice" clip-path="inset(0 round 12px)"/><rect x=".5" y=".5" width="63" height="63" rx="14" fill="none" stroke="rgba(255,255,255,.18)"/></svg>',
+    // Finder
+    library: SVG64 + '<defs><linearGradient id="gFiL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fc6ff"/><stop offset="1" stop-color="#3aa0f2"/></linearGradient><linearGradient id="gFiR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a7ee6"/><stop offset="1" stop-color="#1655c9"/></linearGradient></defs>' +
+      '<path d="M14.5 0H32v64H14.5A14.5 14.5 0 0 1 0 49.5v-35A14.5 14.5 0 0 1 14.5 0z" fill="url(#gFiL)"/><path d="M32 0h17.5A14.5 14.5 0 0 1 64 14.5v35A14.5 14.5 0 0 1 49.5 64H32z" fill="url(#gFiR)"/>' +
+      '<ellipse cx="21" cy="26" rx="2.6" ry="4.2" fill="#0d2f66"/><ellipse cx="43" cy="26" rx="2.6" ry="4.2" fill="#0d2f66"/>' +
+      '<path d="M16 42c5 6.5 27 6.5 32 0" fill="none" stroke="#0d2f66" stroke-width="3.2" stroke-linecap="round"/><path d="M32 34v12" stroke="#0d2f66" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<rect x=".5" y=".5" width="63" height="63" rx="14" fill="none" stroke="rgba(0,0,0,.35)"/></svg>',
+    // YouTube
+    player: tile("gYt", ["#ffffff", "#f2f2f4"], '<path d="' + YT_PATH + '" fill="#FF0000" transform="translate(11 11) scale(1.75)"/>', "v"),
+    // Spotify
+    spotify: tile("gSp", ["#191414", "#000000"], '<path d="' + SP_PATH + '" fill="#1ED760" transform="translate(11.5 11.5) scale(1.708)"/>', "v"),
+    // Apple Music
+    apple: tile("gAm", ["#FB5C74", "#FA233B"], '<path d="' + AM_PATH + '" fill="#fff" transform="translate(11 11) scale(1.75)"/>', "v"),
+    // Contacts
+    artists: tile("gCo", ["#d6d6db", "#9a9aa2"],
+      '<path d="M50 0h-2v64h2z" fill="rgba(0,0,0,.08)"/><rect x="54" y="10" width="6" height="8" rx="2" fill="#ff9f0a"/><rect x="54" y="22" width="6" height="8" rx="2" fill="#30d158"/><rect x="54" y="34" width="6" height="8" rx="2" fill="#0a84ff"/><rect x="54" y="46" width="6" height="8" rx="2" fill="#ff375f"/>' +
+      '<circle cx="27" cy="25" r="9" fill="#fff"/><path d="M9 52c1-11 8-17 18-17s17 6 18 17z" fill="#fff"/>', "v"),
+    // Safari
+    browser: tile("gSa", ["#ffffff", "#e6e6ea"],
+      '<defs><radialGradient id="gSaB" cx=".5" cy=".5" r=".55"><stop offset="0" stop-color="#37b3ff"/><stop offset="1" stop-color="#0a5ce6"/></radialGradient></defs><circle cx="32" cy="32" r="25" fill="url(#gSaB)"/>' + safariTicks +
+      '<path d="M32 32L47.5 16.5 36 36z" fill="#ff3b30"/><path d="M32 32L16.5 47.5 28 28z" fill="#fff"/><path d="M47.5 16.5 36 36 28 28z" fill="#e0261d"/><path d="M16.5 47.5 28 28l8 8z" fill="#dcdce2"/>', "v"),
+    // Terminal
+    terminal: SVG64 + '<rect x="0" y="0" width="64" height="64" rx="14.5" fill="#1b1b1f"/><path d="M14.5 0h35A14.5 14.5 0 0 1 64 14.5V15H0v-.5A14.5 14.5 0 0 1 14.5 0z" fill="#d8d8dc"/><path d="M16 26l11 9-11 9" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 44h16" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x=".5" y=".5" width="63" height="63" rx="14" fill="none" stroke="rgba(0,0,0,.4)"/></svg>',
+    // Numbers
+    stats: tile("gNu", ["#3fd964", "#1fa64a"], '<rect x="14" y="36" width="9" height="14" rx="1.5" fill="#fff"/><rect x="27.5" y="24" width="9" height="26" rx="1.5" fill="#fff"/><rect x="41" y="14" width="9" height="36" rx="1.5" fill="#fff"/>', "v"),
+    // System Settings
+    settings: tile("gSe", ["#b4b4ba", "#77777e"], '<polygon points="' + gear.join(" ") + '" fill="#3d3d42"/><circle cx="32" cy="32" r="7.5" fill="#c9c9ce"/>', "v"),
+    // Radio (Apple-style, no single "real" app for this one)
+    radio: tile("gRa", ["#c77dff", "#7a2fe0"], '<circle cx="32" cy="34" r="5.5" fill="#fff"/><path d="M21 23a15 15 0 0 0 0 22M43 23a15 15 0 0 1 0 22M14 16a25 25 0 0 0 0 36M50 16a25 25 0 0 1 0 36" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>', "v"),
+    about: SVG64 + '<rect x="0" y="0" width="64" height="64" rx="14.5" fill="#0b0b12"/><image href="assets/logo.png" x="4" y="4" width="56" height="56" preserveAspectRatio="xMidYMid slice" clip-path="inset(0 round 12px)"/></svg>',
+    keepup: tile("gKu", ["#ffffff", "#f2f2f4"], '<path d="' + YT_PATH + '" fill="#FF0000" transform="translate(11 11) scale(1.75)"/>', "v"),
     // brand glyphs for link buttons (24px)
-    youtube: TD.svg('<path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/>'),
-    spotifyG: TD.svg('<path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm5.5 17.3a.75.75 0 0 1-1 .25c-2.8-1.7-6.4-2.1-10.6-1.15a.75.75 0 1 1-.33-1.46c4.6-1.05 8.5-.6 11.65 1.33.35.22.46.68.25 1.03zm1.47-3.27a.94.94 0 0 1-1.29.3c-3.2-2-8.1-2.55-11.9-1.4a.94.94 0 1 1-.55-1.8c4.35-1.32 9.75-.68 13.44 1.6.44.27.58.86.3 1.3zm.13-3.4C15.26 8.35 8.9 8.13 5.23 9.25a1.13 1.13 0 1 1-.65-2.16c4.2-1.28 11.2-1.03 15.63 1.6a1.13 1.13 0 0 1-1.15 1.94z"/>'),
-    appleG: TD.svg('<path d="M18.7 2.5v13.1a3.4 3.4 0 1 1-2-3.1V6.7L9.3 8.3v9.3a3.4 3.4 0 1 1-2-3.1V5.4a1 1 0 0 1 .8-1l9.4-2.1a1 1 0 0 1 1.2 1z"/>'),
+    youtube: TD.svg('<path d="' + YT_PATH + '"/>'),
+    spotifyG: TD.svg('<path d="' + SP_PATH + '"/>'),
+    appleG: TD.svg('<path d="' + AM_PATH + '"/>'),
     site: TD.svg('<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 9h-3a15.5 15.5 0 0 0-1.3-5.5A8 8 0 0 1 18.9 11zM12 4c.9 1.2 1.7 3.7 1.9 7h-3.8c.2-3.3 1-5.8 1.9-7zM5.1 11a8 8 0 0 1 4.3-5.5A15.5 15.5 0 0 0 8.1 11h-3zm0 2h3a15.5 15.5 0 0 0 1.3 5.5A8 8 0 0 1 5.1 13zm6.9 7c-.9-1.2-1.7-3.7-1.9-7h3.8c-.2 3.3-1 5.8-1.9 7zm2.6-1.5a15.5 15.5 0 0 0 1.3-5.5h3a8 8 0 0 1-4.3 5.5z"/>'),
     play: TD.svg('<path d="M8 5v14l11-7z"/>'),
     pause: TD.svg('<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'),
