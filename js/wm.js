@@ -302,15 +302,22 @@
     tick(); setInterval(tick, 15000);
     $("tb-search").addEventListener("click", function () { TD.launcher(); });
     $("tb-full").addEventListener("click", function () {
-      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+      if (document.fullscreenElement) { document.exitFullscreen(); return; }
+      var p = document.documentElement.requestFullscreen ? document.documentElement.requestFullscreen() : Promise.reject();
+      if (TD.embedded) Promise.resolve(p).catch(function () { window.open(TD.standaloneUrl(), "_blank"); });
     });
+    if (TD.embedded) {
+      $("tb-full").title = "Full screen (or open TDPlay OS in its own tab)";
+      var ext = TD.h("button", { "class": "tb-btn", title: "Open TDPlay OS in its own tab", html: TD.icons.ext.replace("<svg", '<svg style="fill:currentColor;stroke:none"') , onclick: function () { window.open(TD.standaloneUrl(), "_blank"); } });
+      $("tb-full").parentNode.insertBefore(ext, $("tb-full"));
+    }
     $("tb-logo").addEventListener("click", function (e) {
       var r = e.currentTarget.getBoundingClientRect();
       TD.menu(r.left, r.bottom + 4, [
         { label: "About TDPlay OS", fn: function () { TD.open("about"); } }, "-",
         { label: "Search…", k: "⌘K", fn: function () { TD.launcher(); } },
         { label: "Settings", fn: function () { TD.open("settings"); } }, "-",
-        { label: "Open tdplay.site", icon: TD.icons.ext, fn: function () { window.open(TD.SITE, "_blank"); } },
+        TD.embedded ? { label: "Open TDPlay OS in its own tab", icon: TD.icons.ext, fn: function () { window.open(TD.standaloneUrl(), "_blank"); } } : { label: "Open tdplay.site", icon: TD.icons.ext, fn: function () { window.open(TD.SITE, "_blank"); } },
         { label: "TDPlay Search", icon: TD.icons.ext, fn: function () { window.open(TD.SEARCH_URL, "_blank"); } }, "-",
         { label: "Close all windows", fn: function () { TD.closeAll(); } },
         { label: "Restart", fn: function () { location.reload(); } }

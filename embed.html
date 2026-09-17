@@ -1,0 +1,29 @@
+<!-- TDPlay OS on tdplay.site: paste this into a Hostinger "Embed code" element (Add element → Embed code).
+     It fills the rest of the browser window below the site header. -->
+<div id="tdplay-os" style="background:#07070c;min-height:480px"></div>
+<script>
+(function () {
+  var box = document.getElementById("tdplay-os");
+  var f = document.createElement("iframe");
+  f.src = "https://mircix.github.io/tdplay-os/?embed=1";
+  f.title = "TDPlay OS";
+  f.setAttribute("allow", "autoplay; encrypted-media; fullscreen; clipboard-write; picture-in-picture; web-share");
+  f.setAttribute("allowfullscreen", "");
+  f.style.cssText = "display:block;width:100%;border:0;background:#07070c";
+  box.appendChild(f);
+  // Size it so the OS fills the viewport under the header: Hostinger runs this inside a same-origin
+  // srcdoc frame and grows that frame to whatever height we report, so measure against the real window.
+  function fit() {
+    var h = window.innerHeight;
+    try {
+      var fe = window.frameElement, p = window.parent;
+      if (fe && p && p !== window) { var top = fe.getBoundingClientRect().top + (p.scrollY || 0); h = p.innerHeight - top; }
+    } catch (e) { }
+    h = Math.max(480, Math.round(h) - 6);
+    box.style.height = h + "px"; f.style.height = h + "px";
+  }
+  fit();
+  var tries = 0, t = setInterval(function () { fit(); if (++tries > 20) clearInterval(t); }, 500);   // the page settles for a few seconds
+  try { window.parent.addEventListener("resize", fit); } catch (e) { window.addEventListener("resize", fit); }
+})();
+</script>

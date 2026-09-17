@@ -15,6 +15,14 @@
   S.login = function () {
     var cid = S.clientId();
     if (!cid) { TD.open("settings", { tab: "spotify" }); TD.notify("Spotify", "Paste your Spotify app Client ID in Settings first.", { icon: TD.icons.spotify }); return; }
+    if (TD.embedded) {
+      // Spotify won't show its sign-in inside a frame: run the whole flow in a popup of the standalone OS,
+      // which posts the tokens back here when it's done (storage is partitioned inside the embed, so it can't just share localStorage).
+      var w = window.open(TD.standaloneUrl() + "?splogin=" + encodeURIComponent(cid), "tdos-spotify", "popup,width=560,height=760");
+      if (!w) { TD.notify("Spotify", "Your browser blocked the sign-in window — allow pop-ups for this site and try again.", { icon: TD.icons.spotify }); return; }
+      TD.notify("Spotify", "Finish signing in in the window that just opened.", { icon: TD.icons.spotify });
+      return;
+    }
     var verifier = rand(64);
     crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)).then(function (hash) {
       sessionStorage.setItem("sp:verifier", verifier);
@@ -32,7 +40,13 @@
       body: new URLSearchParams({ client_id: S.clientId(), grant_type: "authorization_code", code: q.get("code"), redirect_uri: S.redirectUri(), code_verifier: verifier }) })
       .then(function (r) { return r.json(); }).then(function (t) {
         if (!t.access_token) throw new Error(t.error_description || t.error || "no token");
-        saveTokens(t); TD.notify("Spotify connected", "TDPlay OS is now a Spotify Connect device.", { icon: TD.icons.spotify });
+        saveTokens(t);
+        if (window.opener && !window.opener.closed) {
+          // we are the popup opened by an embedded TDPlay OS: hand the tokens over and go away
+          try { window.opener.postMessage({ type: "tdos:spotify", tokens: S.tokens(), clientId: S.clientId() }, location.origin); } catch (e) { }
+          return "popup";
+        }
+        TD.notify("Spotify connected", "TDPlay OS is now a Spotify Connect device.", { icon: TD.icons.spotify });
         TD.store.set("sp:openAfter", true);
         return true;
       }).catch(function (e) { TD.notify("Spotify sign-in failed", e.message, { icon: TD.icons.spotify }); return false; });
@@ -58,6 +72,13 @@
     document.getElementById("tb-spotify").classList.remove("on");
     TD.bus.emit("spotify:state", S);
   };
+
+  window.addEventListener("message", function (e) {
+    if (e.origin !== location.origin || !e.data || e.data.type !== "tdos:spotify" || !e.data.tokens) return;
+    TD.store.set("sp:tokens", e.data.tokens); if (e.data.clientId) TD.store.set("sp:clientId", e.data.clientId);
+    TD.notify("Spotify connected", "TDPlay OS is now a Spotify Connect device.", { icon: TD.icons.spotify });
+    S.connect().then(function () { TD.bus.emit("spotify:state", S); TD.open("spotify"); });
+  });
 
   // ---------------------------------------------------------------- Web API
   S.api = function (method, path, body) {

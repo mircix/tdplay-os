@@ -7,6 +7,8 @@ window.TD = window.TD || {};
   TD.SITE = "https://tdplay.site";
   TD.DATA_URL = "https://mircix.github.io/tdplay-search/data.json";
   TD.SEARCH_URL = "https://mircix.github.io/tdplay-search/";
+  TD.embedded = (function () { try { return window.top !== window.self; } catch (e) { return true; } })();   // running inside tdplay.site
+  TD.standaloneUrl = function () { return location.origin + location.pathname.replace(/index\.html$/, ""); };
 
   // ---------------------------------------------------------------- dom
   TD.h = function (tag, attrs, children) {

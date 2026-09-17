@@ -28,7 +28,7 @@
             S.tokens() ? TD.h("button", { "class": "btn", text: "Disconnect", onclick: function () { S.logout(); render(); } })
               : TD.h("button", { "class": "btn spotify", html: TD.icons.spotifyG + " Connect Spotify", disabled: !S.clientId(), onclick: function () { S.login(); } })
           ]));
-          main.appendChild(TD.h("div", { "class": "muted", style: "margin-top:14px;font-size:12.5px", text: "Status: " + (S.connected ? "connected as " + (S.me ? (S.me.display_name || S.me.id) : "…") : S.tokens() ? "signed in, player not ready yet" : "not connected") }));
+          main.appendChild(TD.h("div", { "class": "muted", style: "margin-top:14px;font-size:12.5px", text: "Status: " + (S.connected ? "connected as " + (S.me ? (S.me.display_name || S.me.id) : "…") : S.tokens() ? "signed in, player not ready yet" : "not connected") + (TD.embedded ? " · inside tdplay.site the sign-in opens in a pop-up window" : "") }));
         }
         if (state.tab === "look") {
           main.appendChild(TD.h("h2", { text: "Wallpaper" }));

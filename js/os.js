@@ -25,8 +25,28 @@
     return false;
   }
 
+  function popupFlow() {
+    // Spotify sign-in popup opened by an embedded TDPlay OS (see spotify.js): no desktop, just the OAuth dance.
+    var q = new URLSearchParams(location.search);
+    if (q.get("splogin")) {
+      TD.store.set("sp:clientId", q.get("splogin"));
+      progress(.3, "Opening Spotify sign-in…");
+      TD.spotify.login();
+      return true;
+    }
+    if ((q.get("code") || q.get("error")) && window.opener) {
+      progress(.6, "Finishing Spotify sign-in…");
+      TD.spotify.handleRedirect().then(function (r) {
+        progress(1, r === "popup" ? "Connected — you can close this window." : "Sign-in failed — close this window and try again.");
+        if (r === "popup") setTimeout(function () { window.close(); }, 800);
+      });
+      return true;
+    }
+    return false;
+  }
   function boot() {
     applyPrefs();
+    if (popupFlow()) return;
     TD.wm.init(); TD.player.init();
     progress(.05, "Loading TDPlay index…");
     var t0 = Date.now();

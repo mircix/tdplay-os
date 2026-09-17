@@ -50,6 +50,14 @@ tdplay.site ──► mircix/tdplay-search (index rebuilt every 6 h) ──► d
 
 The sign-in stays in your browser (PKCE, no secret, no server).
 
+## On tdplay.site
+
+`embed.html` is the snippet for a Hostinger **Embed code** element: it drops the OS into the page
+as an iframe that fills the window under the site header. Inside the site the Spotify sign-in
+opens in a pop-up (Spotify refuses to be framed), and the top bar gets an "open in its own tab"
+button. Settings / sign-in made inside the site are stored separately from the standalone URL
+(browsers partition storage for embedded pages).
+
 ## Run locally
 
 ```bash
