@@ -170,10 +170,12 @@ window.TD = window.TD || {};
     spotify: tile("gSp", ["#191414", "#000000"], '<path d="' + SP_PATH + '" fill="#1ED760" transform="translate(11.5 11.5) scale(1.708)"/>', "v"),
     // Apple Music
     apple: tile("gAm", ["#FB5C74", "#FA233B"], '<path d="' + AM_PATH + '" fill="#fff" transform="translate(11 11) scale(1.75)"/>', "v"),
-    // Contacts
-    artists: tile("gCo", ["#d6d6db", "#9a9aa2"],
-      '<path d="M50 0h-2v64h2z" fill="rgba(0,0,0,.08)"/><rect x="54" y="10" width="6" height="8" rx="2" fill="#ff9f0a"/><rect x="54" y="22" width="6" height="8" rx="2" fill="#30d158"/><rect x="54" y="34" width="6" height="8" rx="2" fill="#0a84ff"/><rect x="54" y="46" width="6" height="8" rx="2" fill="#ff375f"/>' +
-      '<circle cx="27" cy="25" r="9" fill="#fff"/><path d="M9 52c1-11 8-17 18-17s17 6 18 17z" fill="#fff"/>', "v"),
+    // Artists: dark music-profile tile — silhouette with a note badge
+    artists: tile("gAr", ["#32323b", "#101015"],
+      '<circle cx="32" cy="31" r="21" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.12)"/>' +
+      '<circle cx="32" cy="24" r="8.5" fill="#f4f4f7"/><path d="M15 50c1.2-10.5 8-16 17-16s15.8 5.5 17 16z" fill="#f4f4f7"/>' +
+      '<circle cx="46.5" cy="45.5" r="9.5" fill="#ff2b2b" stroke="#101015" stroke-width="2.5"/>' +
+      '<path d="' + AM_PATH + '" fill="#fff" transform="translate(40.2 39.2) scale(.52)"/>', "v"),
     // Safari
     browser: tile("gSa", ["#ffffff", "#e6e6ea"],
       '<defs><radialGradient id="gSaB" cx=".5" cy=".5" r=".55"><stop offset="0" stop-color="#37b3ff"/><stop offset="1" stop-color="#0a5ce6"/></radialGradient></defs><circle cx="32" cy="32" r="25" fill="url(#gSaB)"/>' + safariTicks +
