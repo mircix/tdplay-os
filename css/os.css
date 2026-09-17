@@ -127,11 +127,11 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .win-edge.w{left:-3px;top:10px;bottom:10px;width:7px;cursor:ew-resize}
 
 /* ---------------------------------------------------------------- dock */
-.dock{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:6px;padding:8px 10px;border-radius:22px;z-index:60;max-width:calc(100vw - 20px);overflow-x:auto;overflow-y:visible;scrollbar-width:none;
+.dock{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:6px;padding:8px 10px;border-radius:22px;z-index:60;max-width:calc(100vw - 20px);overflow:visible;scrollbar-width:none;
   background:var(--glass-bg);border:var(--glass-line);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
 .dock::-webkit-scrollbar{display:none}
 .dock-item{position:relative;background:transparent;border:0;padding:0;width:52px;height:52px;flex:none;border-radius:14px;transition:transform .18s cubic-bezier(.2,.9,.3,1.4)}
-.dock-item:hover{transform:translateY(-8px) scale(1.14)}
+.dock-item:hover{transform:translateY(-12px) scale(1.28);z-index:2}
 .dock-item.bounce{animation:bounce .5s ease}
 @keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-16px)}}
 .dock-item .ic{width:52px;height:52px;border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.35)}
@@ -147,10 +147,10 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .yt-layer.inwin{z-index:45;border-radius:10px}
 .yt-layer.pipmode{z-index:70;border-radius:12px 12px 0 0}
 #yt-host,#yt-host iframe{width:100%;height:100%;border:0;display:block}
-.pip{position:fixed;right:16px;bottom:calc(var(--dock) + 20px);width:320px;z-index:69;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.14)}
+.pip{position:fixed;right:20px;bottom:calc(var(--dock) + 24px);width:min(480px,46vw);z-index:69;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 24px 70px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.16)}
 .pip-slot{width:100%;aspect-ratio:16/9;background:#000}
-.pip-bar{display:flex;gap:2px;justify-content:flex-end;padding:4px 6px;background:rgba(16,16,24,.95);cursor:grab}
-.pip-btn{background:transparent;border:0;color:var(--text);font-size:13px;padding:3px 8px;border-radius:6px}
+.pip-bar{display:flex;gap:6px;justify-content:flex-end;align-items:center;padding:6px 10px;background:rgba(16,16,24,.96);cursor:grab}
+.pip-btn{background:transparent;border:0;color:var(--text);font-size:26px;line-height:1;padding:6px 12px;border-radius:9px}
 .pip-btn:hover{background:rgba(255,255,255,.14)}
 
 /* ---------------------------------------------------------------- menu / launcher / toasts */
@@ -383,13 +383,15 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
   .app-split.show-side .app-side{display:block}
   .dock-item{width:44px;height:44px}
   .dock-item .ic{width:44px;height:44px}
+  .dock{overflow-x:auto;overflow-y:hidden}
   .dock-item:hover{transform:none}
   .two-col{grid-template-columns:1fr}
   .card.hero{grid-template-columns:1fr}
   .tb-now{max-width:40vw}
   .tb-now .tb-now-text span{display:none}
   .tb-clock{display:none}
-  .pip{width:220px;right:8px}
+  .pip{width:300px;right:8px}
+  .pip-btn{font-size:20px;padding:4px 9px}
   .row{grid-template-columns:26px 72px 1fr}
   .row .links{display:none}
   .row .th{width:72px}
