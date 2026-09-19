@@ -171,7 +171,7 @@
   }
   TD.buildDock = function () {
     TD.clear(dockEl);
-    var pinned = (TD.store.get("dock") || ["home", "library", "player", "spotify", "apple", "artists", "browser", "radio", "terminal", "stats", "settings"]);
+    var pinned = (TD.store.get("dock") || ["home", "library", "player", "spotify", "apple", "artists", "instagram", "browser", "radio", "terminal", "stats", "settings"]);
     pinned.forEach(function (id, i) {
       var app = apps[id]; if (!app) return;
       if (id === "terminal" || id === "radio") dockEl.appendChild(TD.h("div", { "class": "dock-sep" }));

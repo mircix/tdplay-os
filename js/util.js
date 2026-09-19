@@ -192,6 +192,11 @@ window.TD = window.TD || {};
     stats: tile("gNu", ["#3fd964", "#1fa64a"], '<rect x="14" y="36" width="9" height="14" rx="1.5" fill="#fff"/><rect x="27.5" y="24" width="9" height="26" rx="1.5" fill="#fff"/><rect x="41" y="14" width="9" height="36" rx="1.5" fill="#fff"/>', "v"),
     // System Settings
     settings: tile("gSe", ["#b4b4ba", "#77777e"], '<polygon points="' + gear.join(" ") + '" fill="#3d3d42"/><circle cx="32" cy="32" r="7.5" fill="#c9c9ce"/>', "v"),
+    // Instagram
+    instagram: SVG64 + '<defs><radialGradient id="gIg" cx=".3" cy="1.05" r="1.25"><stop offset="0" stop-color="#fdd835"/><stop offset=".25" stop-color="#f9a825"/><stop offset=".5" stop-color="#e91e63"/><stop offset=".78" stop-color="#9c27b0"/><stop offset="1" stop-color="#3f51b5"/></radialGradient></defs>' +
+      '<rect x="0" y="0" width="64" height="64" rx="14.5" fill="url(#gIg)"/>' +
+      '<rect x="14" y="14" width="36" height="36" rx="10.5" fill="none" stroke="#fff" stroke-width="3.6"/><circle cx="32" cy="32" r="8.6" fill="none" stroke="#fff" stroke-width="3.6"/><circle cx="41.8" cy="22.2" r="2.4" fill="#fff"/>' +
+      '<rect x=".5" y=".5" width="63" height="63" rx="14" fill="none" stroke="rgba(0,0,0,.35)"/></svg>',
     // Radio (Apple-style, no single "real" app for this one)
     radio: tile("gRa", ["#c77dff", "#7a2fe0"], '<circle cx="32" cy="34" r="5.5" fill="#fff"/><path d="M21 23a15 15 0 0 0 0 22M43 23a15 15 0 0 1 0 22M14 16a25 25 0 0 0 0 36M50 16a25 25 0 0 1 0 36" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>', "v"),
     about: SVG64 + '<rect x="0" y="0" width="64" height="64" rx="14.5" fill="#0b0b12"/><image href="assets/logo.png" x="4" y="4" width="56" height="56" preserveAspectRatio="xMidYMid slice" clip-path="inset(0 round 12px)"/></svg>',

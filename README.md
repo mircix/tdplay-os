@@ -16,6 +16,7 @@ windows, a dock, and apps for YouTube, Spotify, Apple Music and artist websites.
 | **Spotify** | Month & year playlists; with Spotify Premium connected, TDPlay OS becomes a Spotify Connect device — full tracks, transport, and *Save as playlist* for any month or artist |
 | **Apple Music** | Month & year playlists and any pick, via Apple's embed player |
 | **Artists** | 2,000+ artists with their website, songs, first/latest feature, Spotify / Apple links |
+| **Instagram** | TDPlay's @mitch_tdp plus 180+ featured artists' Instagram profiles; paste any post/reel link to view it inside the OS |
 | **Artist Websites** | Every artist's website inside the OS; sites that forbid framing open in a new tab instead (pre-checked, see `sites.json`) |
 | **Terminal** | `play lolo`, `cd aug 26`, `radio 2024`, `search …`, `neofetch` |
 | **Stats** | Most featured artists, songs per year and month, link coverage |
