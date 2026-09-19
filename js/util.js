@@ -158,12 +158,16 @@ window.TD = window.TD || {};
   var gear = (function () { var pts = []; for (var i = 0; i < 16; i++) { var a = i * Math.PI / 8, r = i % 2 ? 22 : 17; for (var k = -1; k <= 1; k += 2) { var aa = a + k * (i % 2 ? .13 : .2); pts.push((32 + Math.cos(aa) * r).toFixed(1) + "," + (32 + Math.sin(aa) * r).toFixed(1)); } } return pts; })();
   TD.icons = {
     home: SVG64 + '<rect x="0" y="0" width="64" height="64" rx="14.5" fill="#0b0b12"/><image href="assets/logo.png" x="4" y="4" width="56" height="56" preserveAspectRatio="xMidYMid slice" clip-path="inset(0 round 12px)"/><rect x=".5" y=".5" width="63" height="63" rx="14" fill="none" stroke="rgba(255,255,255,.18)"/></svg>',
-    // Finder
-    library: SVG64 + '<defs><linearGradient id="gFiL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fc6ff"/><stop offset="1" stop-color="#3aa0f2"/></linearGradient><linearGradient id="gFiR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a7ee6"/><stop offset="1" stop-color="#1655c9"/></linearGradient></defs>' +
-      '<path d="M14.5 0H32v64H14.5A14.5 14.5 0 0 1 0 49.5v-35A14.5 14.5 0 0 1 14.5 0z" fill="url(#gFiL)"/><path d="M32 0h17.5A14.5 14.5 0 0 1 64 14.5v35A14.5 14.5 0 0 1 49.5 64H32z" fill="url(#gFiR)"/>' +
-      '<ellipse cx="21" cy="26" rx="2.6" ry="4.2" fill="#0d2f66"/><ellipse cx="43" cy="26" rx="2.6" ry="4.2" fill="#0d2f66"/>' +
-      '<path d="M16 42c5 6.5 27 6.5 32 0" fill="none" stroke="#0d2f66" stroke-width="3.2" stroke-linecap="round"/><path d="M32 34v12" stroke="#0d2f66" stroke-width="2.4" stroke-linecap="round"/>' +
-      '<rect x=".5" y=".5" width="63" height="63" rx="14" fill="none" stroke="rgba(0,0,0,.35)"/></svg>',
+    // Library: dark tile with a 2x2 grid of album tiles in the TDPlay colours
+    library: tile("gLi", ["#32323b", "#101015"],
+      '<defs><linearGradient id="gLi1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5a5a"/><stop offset="1" stop-color="#c2181f"/></linearGradient>' +
+      '<linearGradient id="gLi2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7cf3"/><stop offset="1" stop-color="#b52ca4"/></linearGradient>' +
+      '<linearGradient id="gLi3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bafcfc"/><stop offset="1" stop-color="#2fb5c4"/></linearGradient>' +
+      '<linearGradient id="gLi4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#d9a01e"/></linearGradient></defs>' +
+      '<rect x="13" y="13" width="17" height="17" rx="4" fill="url(#gLi1)"/><rect x="34" y="13" width="17" height="17" rx="4" fill="url(#gLi2)"/>' +
+      '<rect x="13" y="34" width="17" height="17" rx="4" fill="url(#gLi3)"/><rect x="34" y="34" width="17" height="17" rx="4" fill="url(#gLi4)"/>' +
+      '<path d="' + AM_PATH + '" fill="rgba(255,255,255,.92)" transform="translate(16.5 16.5) scale(.42)"/>' +
+      '<rect x="13" y="13" width="38" height="38" rx="4" fill="none" stroke="rgba(255,255,255,.08)"/>', "v"),
     // YouTube
     player: tile("gYt", ["#ffffff", "#f2f2f4"], '<path d="' + YT_PATH + '" fill="#FF0000" transform="translate(11 11) scale(1.75)"/>', "v"),
     // Spotify
