@@ -7,7 +7,8 @@
  *
  * Bindings / settings (Worker → Settings):
  *   KV namespace  IG_KV
- *   secrets       IG_APP_ID, IG_APP_SECRET, ADMIN_KEY
+ *   secret        IG_TOKEN        (simplest: the token from the Meta dashboard's "Generate access tokens")
+ *   secrets       IG_APP_ID, IG_APP_SECRET, ADMIN_KEY   (only for the /auth/start browser sign-in instead)
  *   variable      ALLOWED_ORIGINS = https://mircix.github.io,http://localhost:8787
  *   cron trigger  0 3 * * *   (refreshes the 60-day token)
  */
@@ -92,7 +93,21 @@ async function authCallback(url, env) {
   // drop cached data from a previous account
   return page(`Connected as @${me.username || "?"}. You can close this window — TDPlay OS is now wired to Instagram.`);
 }
-async function getAuth(env) { const v = await env.IG_KV.get("auth"); return v ? JSON.parse(v) : null; }
+async function getAuth(env) {
+  const v = await env.IG_KV.get("auth");
+  if (v) return JSON.parse(v);
+  // Bootstrap from a token generated in the Meta dashboard ("Generate access tokens → Add account"):
+  // set the IG_TOKEN secret once; it's a 60-day token and the nightly cron keeps refreshing it.
+  if (env.IG_TOKEN) {
+    const me = await fetch(`${GRAPH}/me?fields=id,user_id,username&access_token=${encodeURIComponent(env.IG_TOKEN)}`).then(r => r.json());
+    if (me && (me.user_id || me.id)) {
+      const auth = { access_token: env.IG_TOKEN, user_id: me.user_id || me.id, username: me.username || "", expires_at: Date.now() + 55 * 864e5 };
+      await env.IG_KV.put("auth", JSON.stringify(auth));
+      return auth;
+    }
+  }
+  return null;
+}
 async function sign(env, msg) { const mac = await hmac(env, msg); return `${msg}.${mac}`; }
 async function verify(env, state) {
   const [msg, mac] = state.split("."); if (!msg || !mac) return false;
