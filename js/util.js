@@ -169,7 +169,7 @@ window.TD = window.TD || {};
       '<path d="' + AM_PATH + '" fill="rgba(255,255,255,.92)" transform="translate(16.5 16.5) scale(.42)"/>' +
       '<rect x="13" y="13" width="38" height="38" rx="4" fill="none" stroke="rgba(255,255,255,.08)"/>', "v"),
     // YouTube
-    player: tile("gYt", ["#ffffff", "#f2f2f4"], '<path d="' + YT_PATH + '" fill="#FF0000" transform="translate(11 11) scale(1.75)"/>', "v"),
+    player: tile("gYt", ["#32323b", "#101015"], '<path d="' + YT_PATH + '" fill="#FF0000" transform="translate(11 11) scale(1.75)"/><path d="M9.545 15.568V8.432L15.818 12z" fill="#fff" transform="translate(11 11) scale(1.75)"/>', "v"),
     // Spotify
     spotify: tile("gSp", ["#191414", "#000000"], '<path d="' + SP_PATH + '" fill="#1ED760" transform="translate(11.5 11.5) scale(1.708)"/>', "v"),
     // Apple Music
@@ -181,7 +181,7 @@ window.TD = window.TD || {};
       '<circle cx="46.5" cy="45.5" r="9.5" fill="#ff2b2b" stroke="#101015" stroke-width="2.5"/>' +
       '<path d="' + AM_PATH + '" fill="#fff" transform="translate(40.2 39.2) scale(.52)"/>', "v"),
     // Safari
-    browser: tile("gSa", ["#ffffff", "#e6e6ea"],
+    browser: tile("gSa", ["#32323b", "#101015"],
       '<defs><radialGradient id="gSaB" cx=".5" cy=".5" r=".55"><stop offset="0" stop-color="#37b3ff"/><stop offset="1" stop-color="#0a5ce6"/></radialGradient></defs><circle cx="32" cy="32" r="25" fill="url(#gSaB)"/>' + safariTicks +
       '<path d="M32 32L47.5 16.5 36 36z" fill="#ff3b30"/><path d="M32 32L16.5 47.5 28 28z" fill="#fff"/><path d="M47.5 16.5 36 36 28 28z" fill="#e0261d"/><path d="M16.5 47.5 28 28l8 8z" fill="#dcdce2"/>', "v"),
     // Terminal
@@ -193,7 +193,7 @@ window.TD = window.TD || {};
     // Radio (Apple-style, no single "real" app for this one)
     radio: tile("gRa", ["#c77dff", "#7a2fe0"], '<circle cx="32" cy="34" r="5.5" fill="#fff"/><path d="M21 23a15 15 0 0 0 0 22M43 23a15 15 0 0 1 0 22M14 16a25 25 0 0 0 0 36M50 16a25 25 0 0 1 0 36" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>', "v"),
     about: SVG64 + '<rect x="0" y="0" width="64" height="64" rx="14.5" fill="#0b0b12"/><image href="assets/logo.png" x="4" y="4" width="56" height="56" preserveAspectRatio="xMidYMid slice" clip-path="inset(0 round 12px)"/></svg>',
-    keepup: tile("gKu", ["#ffffff", "#f2f2f4"], '<path d="' + YT_PATH + '" fill="#FF0000" transform="translate(11 11) scale(1.75)"/>', "v"),
+    keepup: tile("gKu", ["#32323b", "#101015"], '<path d="' + YT_PATH + '" fill="#FF0000" transform="translate(11 11) scale(1.75)"/><path d="M9.545 15.568V8.432L15.818 12z" fill="#fff" transform="translate(11 11) scale(1.75)"/>', "v"),
     // brand glyphs for link buttons (24px)
     youtube: TD.svg('<path d="' + YT_PATH + '"/>'),
     spotifyG: TD.svg('<path d="' + SP_PATH + '"/>'),
