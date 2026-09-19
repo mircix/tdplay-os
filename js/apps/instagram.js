@@ -9,12 +9,16 @@
   }
   // A profile in its own portrait, phone-shaped window (Instagram's profile embed is made for framing)
   TD.register({
-    id: "igprofile", name: "Instagram", desc: "", icon: TD.icons.instagram, hidden: true, single: false, width: 420, height: 660, minWidth: 340, minHeight: 480,
+    id: "igprofile", name: "Instagram", desc: "", icon: TD.icons.instagram, hidden: true, single: false, width: 420, height: 560, minWidth: 340, minHeight: 480,
     mount: function (win, params) {
       var h = (params && params.handle) || "mitch_tdp", name = (params && params.name) || "@" + h;
       win.setTitle("@" + h + " — Instagram");
-      var body = TD.h("div", { "class": "app", style: "background:#fff" });
-      body.appendChild(TD.h("iframe", { "class": "frame", src: "https://www.instagram.com/" + encodeURIComponent(h) + "/embed/", allow: "autoplay; encrypted-media; picture-in-picture", style: "background:#fff", title: name + " on Instagram" }));
+      // Instagram's embed is white-only (no dark theme exists), so keep it to its real content height and let the OS dark fill the rest
+      var body = TD.h("div", { "class": "app", style: "background:#0b0b12" });
+      var fr = TD.h("iframe", { "class": "frame", src: "https://www.instagram.com/" + encodeURIComponent(h) + "/embed/", allow: "autoplay; encrypted-media; picture-in-picture", style: "background:#fff;flex:none;height:470px", title: name + " on Instagram" });
+      body.appendChild(TD.h("div", { style: "flex:1;min-height:0;overflow:auto;background:#0b0b12" }, [fr]));
+      var fit = function () { var w = fr.clientWidth || 420; fr.style.height = Math.round(118 + 2 * (w - 6) / 3 + 10) + "px"; };   // header + 2 rows of 3 square posts
+      win.on("resize", fit); setTimeout(fit, 0);
       body.appendChild(TD.h("div", { style: "flex:none;display:flex;gap:8px;align-items:center;padding:8px 10px;background:rgba(16,16,24,.98);border-top:1px solid rgba(255,255,255,.1)" }, [
         TD.h("span", { html: TD.icons.instagram.replace("<svg", '<svg style="width:22px;height:22px"') }),
         TD.h("div", { style: "flex:1;min-width:0;font-size:13px" }, [TD.h("b", { text: name }), TD.h("div", { "class": "muted", style: "font-size:12px", text: "@" + h })]),
