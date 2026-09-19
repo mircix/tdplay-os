@@ -14,6 +14,19 @@
   }
   function progress(f, msg) { $("boot-fill").style.width = Math.round(f * 100) + "%"; if (msg) $("boot-status").textContent = msg; }
 
+  // Browsers only allow full screen from a user gesture, so the first click anywhere is the trigger.
+  function armFullscreen() {
+    if (!TD.store.get("fullscreenOnOpen", true)) return;
+    if (!document.fullscreenEnabled || document.fullscreenElement) return;
+    var go = function (e) {
+      document.removeEventListener("pointerdown", go, true);
+      if (e.target.closest && e.target.closest("#tb-full")) return;        // that button handles itself
+      var p = document.documentElement.requestFullscreen({ navigationUI: "hide" });
+      if (p && p.then) p.then(function () { TD.notify("Full screen", "Press Esc to leave.", { ms: 2500 }); }).catch(function () { });
+    };
+    document.addEventListener("pointerdown", go, true);
+  }
+  TD.armFullscreen = armFullscreen;
   function openFromHash() {
     var h = location.hash.replace(/^#/, ""); if (!h) return false;
     var p = new URLSearchParams(h), app = p.get("app") || p.get("open");
@@ -57,6 +70,7 @@
       setTimeout(function () {
         $("desktop").hidden = false;
         $("boot").classList.add("out");
+        armFullscreen();
         setTimeout(function () { $("boot").remove(); }, 700);
         TD.spotify.handleRedirect().then(function (ok) {
           if (ok || TD.store.get("sp:openAfter")) { TD.store.del("sp:openAfter"); TD.open("spotify"); return; }
