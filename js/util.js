@@ -125,6 +125,17 @@ window.TD = window.TD || {};
     return u + (u.indexOf("?") === -1 ? "?" : "&") + "theme=dark";        // Apple's embed honours theme=dark
   };
 
+  // A phone-shaped popup window (real site, no toolbar) — used for Instagram, which refuses to load inside other pages.
+  TD.phoneWindow = function (url, name) {
+    var w = 420, h = Math.min(820, (screen.availHeight || 900) - 60);
+    var left = Math.round((window.screenX || 0) + ((window.outerWidth || screen.width) - w) / 2);
+    var top = Math.round((window.screenY || 0) + Math.max(0, ((window.outerHeight || screen.height) - h) / 2));
+    var win = window.open(url, name || "tdos-phone", "popup=yes,width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",resizable=yes,scrollbars=yes");
+    if (!win) TD.notify("Pop-up blocked", "Allow pop-ups for TDPlay OS to open this in a phone window.", { ms: 4000 });
+    else try { win.focus(); } catch (e) { }
+    return win;
+  };
+
   // ---------------------------------------------------------------- store / bus
   TD.store = {
     get: function (k, d) { try { var v = localStorage.getItem("tdos:" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
