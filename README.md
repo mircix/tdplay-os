@@ -82,3 +82,6 @@ then open http://127.0.0.1:8787/ — the catalog still loads from GitHub Pages (
 ## Deploy
 
 GitHub Pages, `main` branch, root. `.nojekyll` is there so nothing gets processed.
+Before committing a change run `python3 tools/stamp.py` — it rewrites the `?v=` on every script
+and stylesheet URL in `index.html`, so visitors' browsers fetch the new files instead of cached ones
+(GitHub Pages caches for 10 minutes; browsers may keep files longer).
