@@ -78,7 +78,7 @@
     if (it.apple) items.push({ label: "Open in Apple Music app", icon: TD.icons.appleG, fn: function () { TD.open("apple", { link: it.apple, item: it }); } });
     items.push("-");
     if (it.artistKey) items.push({ label: "Artist: " + (TD.catalog.artistByKey[it.artistKey] || {}).name, icon: TD.icons.artists, fn: function () { TD.open("artists", { artist: it.artistKey }); } });
-    if (it.site) items.push({ label: "Artist website in Browser", icon: TD.icons.site, fn: function () { TD.open("browser", { url: it.site, title: it.artist }); } });
+    if (it.site) items.push({ label: "Open artist website", icon: TD.icons.site, fn: function () { TD.open("browser", { url: it.site, title: it.artist }); } });
     if (it.month && it.month.key) items.push({ label: "Open " + it.month.title, icon: TD.icons.home, fn: function () { TD.open("home", { month: it.month.key, page: it.page ? it.page.page : 1 }); } });
     items.push({ label: it.external ? "Watch on YouTube" : "Show on tdplay.site", icon: TD.icons.ext, fn: function () { window.open(it.url, "_blank"); } });
     if (TD.yt.signedIn && it.yt) items = items.concat(["-", { label: "Like on YouTube", icon: TD.icons.youtube, fn: function () { TD.yt.like(it.yt).then(function () { TD.notify("Liked on YouTube", it.caption, { img: TD.thumb(it) }); }).catch(function (e) { TD.notify("YouTube", e.message); }); } },

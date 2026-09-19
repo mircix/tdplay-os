@@ -123,7 +123,7 @@
       TD.menu(e.clientX, e.clientY, [{ head: A.name },
         { label: "Play all", icon: TD.icons.play, fn: function () { TD.player.play(A.items, 0, { label: A.name }); } },
         { label: "Open artist", icon: TD.icons.artists, fn: function () { TD.open("artists", { artist: A.key }); } },
-        A.site ? { label: "Website in Browser", icon: TD.icons.site, fn: function () { TD.open("browser", { url: A.site, title: A.name }); } } : null].filter(Boolean));
+        A.site ? { label: "Open website", icon: TD.icons.site, fn: function () { TD.open("browser", { url: A.site, title: A.name }); } } : null].filter(Boolean));
     });
     return el;
   };

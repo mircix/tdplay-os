@@ -2,7 +2,7 @@
 (function (TD) {
   "use strict";
   TD.register({
-    id: "browser", name: "Browser", desc: "Artist websites, inside the OS", icon: TD.icons.browser, width: 1100, height: 740, single: false, keywords: "browser web artist site",
+    id: "browser", name: "Artist Websites", desc: "Every artist's website, inside the OS", icon: TD.icons.browser, width: 1100, height: 740, single: false, keywords: "browser web artist site",
     mount: function (win, params) {
       var C = TD.catalog, hist = [], pos = -1, hintTimer = 0;
       var app = TD.h("div", { "class": "app" });
@@ -55,7 +55,7 @@
         if (!noHist) { hist = hist.slice(0, pos + 1); hist.push(u); pos = hist.length - 1; }
         url.value = u; start.hidden = true; frame.hidden = false; hint.hidden = true;
         frame.src = u;
-        win.setTitle((title || TD.domain(u)) + " — Browser");
+        win.setTitle((title || TD.domain(u)) + " — Artist Websites");
         bBack.disabled = pos <= 0; bFwd.disabled = pos >= hist.length - 1;
         // We can't tell from here whether a site blocks framing; offer the way out after a moment.
         if (C.frameable(u) === true) return;
@@ -75,7 +75,7 @@
         return t;
       }
       function showStart(query) {
-        clearTimeout(hintTimer); frame.hidden = true; if (frame.src !== "about:blank") frame.src = "about:blank"; start.hidden = false; hint.hidden = true; win.setTitle("Browser");
+        clearTimeout(hintTimer); frame.hidden = true; if (frame.src !== "about:blank") frame.src = "about:blank"; start.hidden = false; hint.hidden = true; win.setTitle("Artist Websites");
         if (!query) url.value = "";
         TD.clear(start); start.scrollTop = 0;
         if (query) {
