@@ -7,6 +7,24 @@
     var m = /instagram\.com\/(?:[^\/]+\/)?(p|reel|reels|tv)\/([A-Za-z0-9_-]+)/.exec(url || "");
     return m ? "https://www.instagram.com/" + (m[1] === "reels" ? "reel" : m[1]) + "/" + m[2] + "/embed/captioned/" : "";
   }
+  // A profile in its own portrait, phone-shaped window (Instagram's profile embed is made for framing)
+  TD.register({
+    id: "igprofile", name: "Instagram", desc: "", icon: TD.icons.instagram, hidden: true, single: false, width: 420, height: 660, minWidth: 340, minHeight: 480,
+    mount: function (win, params) {
+      var h = (params && params.handle) || "mitch_tdp", name = (params && params.name) || "@" + h;
+      win.setTitle("@" + h + " — Instagram");
+      var body = TD.h("div", { "class": "app", style: "background:#fff" });
+      body.appendChild(TD.h("iframe", { "class": "frame", src: "https://www.instagram.com/" + encodeURIComponent(h) + "/embed/", allow: "autoplay; encrypted-media; picture-in-picture", style: "background:#fff", title: name + " on Instagram" }));
+      body.appendChild(TD.h("div", { style: "flex:none;display:flex;gap:8px;align-items:center;padding:8px 10px;background:rgba(16,16,24,.98);border-top:1px solid rgba(255,255,255,.1)" }, [
+        TD.h("span", { html: TD.icons.instagram.replace("<svg", '<svg style="width:22px;height:22px"') }),
+        TD.h("div", { style: "flex:1;min-width:0;font-size:13px" }, [TD.h("b", { text: name }), TD.h("div", { "class": "muted", style: "font-size:12px", text: "@" + h })]),
+        TD.h("a", { "class": "btn sm", href: "https://www.instagram.com/" + h + "/", target: "_blank", rel: "noopener", html: TD.icons.ext + " Open" })
+      ]));
+      win.body.appendChild(body);
+    }
+  });
+  TD.openProfile = function (h, name) { TD.open("igprofile", { handle: h, name: name }); };
+
   TD.register({
     id: "instagram", name: "Instagram", desc: "TDPlay and 180+ artists on Instagram", icon: TD.icons.instagram, width: 980, height: 700, keywords: "instagram insta ig reels posts social",
     mount: function (win, params) {
@@ -28,7 +46,7 @@
 
       function tile(A) {
         var h = handle(A.site);
-        var t = TD.h("div", { "class": "atile", title: "@" + h + " · opens Instagram", onclick: function () { window.open("https://www.instagram.com/" + h + "/", "_blank", "noopener"); } }, [
+        var t = TD.h("div", { "class": "atile", title: "@" + h, onclick: function () { TD.openProfile(h, A.name); } }, [
           TD.h("div", { "class": "av th", style: A.latest && TD.thumb(A.latest) ? "background-image:url(" + TD.thumb(A.latest) + ")" : "" }),
           TD.h("div", { "class": "nm", text: A.name }),
           TD.h("div", { "class": "ct", text: "@" + h })
@@ -36,6 +54,7 @@
         t.addEventListener("contextmenu", function (e) {
           e.preventDefault();
           TD.menu(e.clientX, e.clientY, [{ head: A.name },
+            { label: "Open profile here", icon: TD.icons.instagram, fn: function () { TD.openProfile(h, A.name); } },
             { label: "Open on Instagram", icon: TD.icons.ext, fn: function () { window.open("https://www.instagram.com/" + h + "/", "_blank", "noopener"); } },
             { label: "Play their songs", icon: TD.icons.play, fn: function () { TD.player.play(A.items, 0, { label: A.name }); } },
             { label: "Artist card", icon: TD.icons.artists, fn: function () { TD.open("artists", { artist: A.key }); } }]);
@@ -57,13 +76,13 @@
         var list = qn ? artists.filter(function (A) { return A.norm.indexOf(qn) !== -1 || handle(A.site).indexOf(qn.replace(/\s+/g, "")) !== -1 || TD.norm(A.initials) === qn; }) : artists;
         if (!qn) {
           // TDPlay's own account up top
-          main.appendChild(TD.h("div", { "class": "sp-now", style: "margin-bottom:16px;cursor:pointer", onclick: function () { window.open(TDPLAY_IG, "_blank", "noopener"); } }, [
+          main.appendChild(TD.h("div", { "class": "sp-now", style: "margin-bottom:16px;cursor:pointer", onclick: function () { TD.openProfile("mitch_tdp", "TDPlay"); } }, [
             TD.h("div", { "class": "art", style: "background-image:url(assets/logo.png);border-radius:50%" }),
             TD.h("div", { "class": "t" }, [TD.h("b", { text: "TDPlay" }), TD.h("span", { text: "@mitch_tdp · the monthly picks, on Instagram" }),
               TD.h("div", { "class": "sp-ctl" }, [TD.h("a", { "class": "btn", href: TDPLAY_IG, target: "_blank", rel: "noopener", html: TD.icons.instagram.replace("<svg", '<svg style="width:18px;height:18px"') + " Follow @mitch_tdp", onclick: function (e) { e.stopPropagation(); } })])])
           ]));
         }
-        main.appendChild(TD.h("div", { "class": "sec-h" }, [TD.h("h2", { text: qn ? "Artists matching “" + state.q + "”" : "Artists on Instagram" }), TD.h("span", { "class": "muted", text: TD.plural(list.length, "artist") + (qn ? "" : " · click to open their profile · paste a post link above to view it here") })]));
+        main.appendChild(TD.h("div", { "class": "sec-h" }, [TD.h("h2", { text: qn ? "Artists matching “" + state.q + "”" : "Artists on Instagram" }), TD.h("span", { "class": "muted", text: TD.plural(list.length, "artist") + (qn ? "" : " · click to open a profile here · paste a post link above to view it") })]));
         if (!list.length) { main.appendChild(TD.h("div", { "class": "empty", html: "No artist Instagram matches <b>" + TD.esc(state.q) + "</b>." })); return; }
         var g = TD.h("div", { "class": "agrid" });
         list.forEach(function (A) { g.appendChild(tile(A)); });
