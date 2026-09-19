@@ -16,7 +16,7 @@ windows, a dock, and apps for YouTube, Spotify, Apple Music and artist websites.
 | **Spotify** | Month & year playlists; with Spotify Premium connected, TDPlay OS becomes a Spotify Connect device — full tracks, transport, and *Save as playlist* for any month or artist |
 | **Apple Music** | Month & year playlists and any pick, via Apple's embed player |
 | **Artists** | 2,000+ artists with their website, songs, first/latest feature, Spotify / Apple links |
-| **Instagram** | TDPlay's @mitch_tdp plus 180+ featured artists' Instagram profiles; paste any post/reel link to view it inside the OS |
+| **Instagram** | @mitch_tdp's profile and posts, plus 180+ featured artists' Instagram profiles and post grids in the OS's own dark design (Meta API via `worker/`); personal accounts fall back to Instagram's embed; paste any post/reel link to view it |
 | **Artist Websites** | Every artist's website inside the OS; sites that forbid framing open in a new tab instead (pre-checked, see `sites.json`) |
 | **Terminal** | `play lolo`, `cd aug 26`, `radio 2024`, `search …`, `neofetch` |
 | **Stats** | Most featured artists, songs per year and month, link coverage |
@@ -72,6 +72,12 @@ are playable in the OS, and any song can be liked / added to a playlist from its
 
 Tokens come from Google's token flow (no secret, no server); they're renewed silently through
 your Google session. Writes cost YouTube API quota (50 units each of the 10,000/day).
+
+## Instagram (Meta API)
+
+The Instagram app is powered by a small Cloudflare Worker that holds the owner's token —
+see [`worker/README.md`](worker/README.md) for the one-time setup, then put the worker URL in
+`js/config.js` → `igApi`.
 
 ## Run locally
 

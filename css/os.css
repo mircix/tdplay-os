@@ -363,6 +363,42 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .embed-wrap iframe{display:block;width:100%;border:0}
 .two-col{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
 .sticky{position:sticky;top:0}
+/* instagram */
+.ig-head{display:flex;gap:22px;align-items:flex-start;padding:6px 4px 18px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px}
+.ig-avatar{width:110px;height:110px;border-radius:50%;flex:none;background:#1a1a22 center/cover no-repeat;border:3px solid transparent;background-clip:padding-box;box-shadow:0 0 0 3px rgba(255,255,255,.08),0 10px 30px rgba(0,0,0,.5)}
+.ig-avatar.sm{width:34px;height:34px;box-shadow:none}
+.ig-who{flex:1;min-width:0}
+.ig-name{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.ig-name b{font-family:var(--head);font-size:26px;letter-spacing:.02em;font-weight:500}
+.ig-counts{display:flex;gap:18px;margin-top:8px;font-size:14px;color:var(--muted)}
+.ig-counts b{color:#fff;font-weight:600}
+.ig-bio{margin-top:10px;white-space:pre-wrap;font-size:14px;line-height:1.45}
+.ig-site{display:inline-block;margin-top:4px;font-size:13.5px}
+.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.ig-cell{position:relative;aspect-ratio:1;background:#15151d center/cover no-repeat;cursor:pointer;overflow:hidden;border-radius:6px}
+.ig-cell .ig-badge{position:absolute;top:8px;right:8px;width:22px;height:22px;color:#fff;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))}
+.ig-cell .ig-badge svg{width:100%;height:100%;fill:#fff}
+.ig-hover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:18px;background:rgba(0,0,0,.45);opacity:0;transition:opacity .15s;font-weight:600;color:#fff}
+.ig-hover svg{width:18px;height:18px;fill:#fff;vertical-align:-4px;margin-right:2px}
+.ig-cell:hover .ig-hover{opacity:1}
+.ig-post-ov{position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px;animation:toastin .18s ease}
+.ig-post{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,.9fr);width:min(960px,100%);max-height:100%;background:#0e0e15;border:1px solid rgba(255,255,255,.14);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.ig-media{position:relative;background:#000;display:flex;align-items:center;justify-content:center;min-height:320px}
+.ig-media img,.ig-media video{max-width:100%;max-height:min(78vh,720px);display:block;object-fit:contain}
+.ig-nav{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.85);color:#111;display:flex;align-items:center;justify-content:center}
+.ig-nav svg{width:20px;height:20px}
+.ig-nav.prev{left:10px}.ig-nav.next{right:10px}
+.ig-dots{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:5px}
+.ig-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45)}
+.ig-dots i.on{background:#3aa0ff}
+.ig-side{display:flex;flex-direction:column;padding:14px 16px;min-height:0;overflow:auto;font-size:14px}
+.ig-side-head{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:12px}
+.ig-caption{white-space:pre-wrap;line-height:1.5;margin-bottom:12px}
+.ig-meta{display:flex;gap:14px;align-items:center;color:var(--muted);font-size:13px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.ig-meta svg{width:16px;height:16px;fill:currentColor;vertical-align:-3px}
+.ig-comments{padding-top:10px;display:flex;flex-direction:column;gap:8px;font-size:13.5px}
+.ig-c b{font-weight:600}
+@media (max-width:720px){.ig-post{grid-template-columns:1fr;max-height:100%;overflow:auto}.ig-head{gap:14px}.ig-avatar{width:76px;height:76px}.ig-name b{font-size:20px}.ig-counts{gap:12px;font-size:13px}}
 /* home hero header */
 .home-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
 .home-head h1{font-size:34px;line-height:1}
