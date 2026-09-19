@@ -21,7 +21,7 @@
     TD.dialog({
       icon: '<img src="assets/logo.png" alt="" style="border-radius:18px">',
       title: "Go <em>full screen</em>?",
-      body: "TDPlay OS feels best filling the whole screen. Press Esc any time to leave.",
+      body: "TDPlay OS feels best filling the whole screen. " + (TD.isMobile() ? "Your phone's back gesture leaves it." : "Press Esc any time to leave."),
       check: { label: "Don't ask again", fn: function () { TD.store.set("fullscreenOnOpen", false); } },
       buttons: [
         { label: "Full screen", cls: "gold", fn: function () {
