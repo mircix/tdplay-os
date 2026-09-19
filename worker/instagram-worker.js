@@ -38,9 +38,10 @@ export default {
       let m;
       if ((m = p.match(/^\/discover\/([A-Za-z0-9._]{1,30})$/))) {
         const user = m[1].toLowerCase(), after = url.searchParams.get("after") || "";
-        const data = await cached(env, `bd:${user}:${after}`, 3600, async () => {
+        const data = await cached(env, `bd2:${user}:${after}`, 3600, async () => {
           const q = `business_discovery.username(${user}){${PROFILE_FIELDS},media.limit(24)${after ? `.after(${after})` : ""}{${MEDIA_FIELDS}}}`;
-          const r = await graph(`/${auth.user_id}?fields=${encodeURIComponent(q)}`, auth, true);
+          // with Instagram Login the app user's node is `me` (the numeric IG user id is a different node type)
+          const r = await graph(`/me?fields=${encodeURIComponent(q)}`, auth, true);
           if (r.error) {
             const code = r.error.code, msg = r.error.message || "";
             if (code === 110 || /business|creator|not found|cannot be found|does not exist/i.test(msg)) return { unavailable: true, reason: msg };
