@@ -26,7 +26,9 @@
       TD.dialog({
         icon: '<img src="assets/logo.png" alt="" style="border-radius:18px">',
         title: "Make it <em>full screen</em>",
-        body: "iPhone doesn't let web pages go full screen, but it does let you add this one to your Home Screen — then it opens like an app, without Safari's bars.<br><br><b>Tap the Share button</b> (the square with an arrow) → <b>Add to Home Screen</b> → <b>Add</b>.",
+        body: "iPhone doesn't let web pages go full screen, but it does let you add this one to your Home Screen — then it opens like an app, without Safari's bars.<br><br><b>Tap the Share button</b> " +
+          '<svg viewBox="0 0 24 24" style="width:22px;height:22px;vertical-align:-5px;margin:0 2px;fill:none;stroke:#3aa0ff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v12M8 7l4-4 4 4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>' +
+          " → <b>Add to Home Screen</b> → <b>Add</b>.",
         check: { label: "Don't show again", fn: function () { TD.store.set("fullscreenOnOpen", false); } },
         buttons: [{ label: "Got it", cls: "gold" }]
       });
