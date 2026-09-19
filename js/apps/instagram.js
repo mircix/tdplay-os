@@ -2,7 +2,10 @@
  * (via the owner's worker). Personal accounts fall back to Instagram's embed in a phone-shaped window. */
 (function (TD) {
   "use strict";
-  var TDPLAY_IG = "https://www.instagram.com/mitch_tdp/", OWNER = "mitch_tdp";
+  var TDPLAY_IG = "https://www.instagram.com/mitch_tdp/", OWNER = "mitch_tdp", IG = "https://www.instagram.com/";
+  var PHONE = "ig-phone";                                            // one named phone window for all of real Instagram
+  function phone(path) { return TD.phoneWindow(IG + (path || ""), PHONE); }
+  function igSearchUrl(q) { return IG + "explore/search/keyword/?q=" + encodeURIComponent(q); }
   function handle(url) { try { return (new URL(url).pathname.split("/").filter(Boolean)[0] || "").toLowerCase(); } catch (e) { return ""; } }
   function embedUrl(url) {
     var m = /instagram\.com\/(?:[^\/]+\/)?(p|reel|reels|tv)\/([A-Za-z0-9_-]+)/.exec(url || "");
@@ -42,14 +45,16 @@
     id: "instagram", name: "Instagram", desc: "TDPlay and 180+ artists on Instagram", icon: TD.icons.instagram, width: 1000, height: 720, keywords: "instagram insta ig reels posts social",
     mount: function (win, params) {
       var C = TD.catalog, IG = TD.ig;
-      var state = { tab: "tdplay", q: "", post: "", profile: null };            // profile: {user, name, artist}
+      var state = { tab: "home", q: "", post: "", profile: null };               // profile: {user, name, artist}
       var app = TD.h("div", { "class": "app" }), main = TD.h("div", { "class": "app-main", style: "padding:0" });
       var input = TD.h("input", { type: "search", placeholder: "Search artists, or paste a post / reel link…", autocomplete: "off", spellcheck: "false" });
-      var tTd = TD.h("button", { "class": "tab on", html: IGLOGO(15) + " TDPlay", onclick: function () { go("tdplay"); } });
+      var tHome = TD.h("button", { "class": "tab on", html: IGLOGO(15) + " Home", onclick: function () { go("home"); } });
+      var tTd = TD.h("button", { "class": "tab", text: "TDPlay", onclick: function () { go("tdplay"); } });
       var tAr = TD.h("button", { "class": "tab", text: "Artists", onclick: function () { go("artists"); } });
       var bar = TD.h("div", { "class": "app-toolbar" }, [
-        TD.h("div", { "class": "tabs" }, [tTd, tAr]),
-        TD.h("div", { "class": "search", style: "flex:1;min-width:180px" }, [TD.h("span", { html: TD.icons.search, style: "display:flex" }), input])
+        TD.h("div", { "class": "tabs" }, [tHome, tTd, tAr]),
+        TD.h("div", { "class": "search", style: "flex:1;min-width:180px" }, [TD.h("span", { html: TD.icons.search, style: "display:flex" }), input]),
+        TD.h("button", { "class": "btn sm", title: "Search on Instagram (Enter)", html: TD.icons.ext + " Search Instagram", onclick: function () { var v = input.value.trim(); phone(v ? "explore/search/keyword/?q=" + encodeURIComponent(v) : "explore/"); } })
       ]);
       app.appendChild(bar); app.appendChild(main); win.body.appendChild(app);
       var artists = C.artists.filter(function (A) { return A.domain === "instagram.com" && handle(A.site); });
@@ -60,9 +65,13 @@
         if (embedUrl(v)) { state.post = v; state.q = ""; renderPost(); return; }
         state.post = ""; state.q = v; if (v) { state.tab = "artists"; state.profile = null; } render();
       }, 80));
-      input.addEventListener("keydown", function (e) { if (e.key === "Escape") { input.value = ""; state.q = ""; state.post = ""; render(); } });
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { input.value = ""; state.q = ""; state.post = ""; render(); }
+        if (e.key === "Enter") { var v = input.value.trim(); if (v && !embedUrl(v)) phone("explore/search/keyword/?q=" + encodeURIComponent(v)); }   // real Instagram search
+      });
+      input.placeholder = "Search Instagram (Enter) · filter artists · paste a post link";
       function go(tab) { state.tab = tab; state.profile = null; state.post = ""; render(); }
-      function setTabs() { tTd.classList.toggle("on", state.tab === "tdplay"); tAr.classList.toggle("on", state.tab === "artists"); }
+      function setTabs() { tHome.classList.toggle("on", state.tab === "home"); tTd.classList.toggle("on", state.tab === "tdplay"); tAr.classList.toggle("on", state.tab === "artists"); }
 
       // ---------------------------------------------------------- pieces
       function header(P, opts) {
@@ -172,8 +181,30 @@
         setTabs(); TD.clear(main); main.scrollTop = 0;
         if (state.post) return renderPost();
         if (state.profile) return renderProfile(state.profile);
+        if (state.tab === "home") return renderHome();
         if (state.tab === "tdplay") return renderOwner();
         renderArtists();
+      }
+      // Home: the real Instagram (feed, reels, explore, messages, notifications) in the phone window —
+      // Instagram allows no other way to show a feed or its search on another site.
+      function renderHome() {
+        win.setTitle("Instagram");
+        var box = TD.h("div", { style: "padding:22px 18px 24px" });
+        var auto = TD.h("input", { type: "checkbox", checked: TD.store.get("ig:autoOpen", true) !== false, onchange: function (e) { TD.store.set("ig:autoOpen", e.target.checked); } });
+        box.appendChild(TD.h("div", { "class": "sp-now", style: "margin-bottom:18px;cursor:pointer", onclick: function () { phone(""); } }, [
+          TD.h("div", { "class": "art", style: "background:none;box-shadow:none;display:flex;align-items:center;justify-content:center", html: IGLOGO(84) }),
+          TD.h("div", { "class": "t" }, [
+            TD.h("b", { text: "Your Instagram" }),
+            TD.h("span", { text: "Home feed, stories, search, messages — the real Instagram, signed in as you, in a phone-sized window." }),
+            TD.h("div", { "class": "sp-ctl" }, [TD.h("button", { "class": "btn primary", html: IGLOGO(18) + " Open Instagram", onclick: function (e) { e.stopPropagation(); phone(""); } })])
+          ])]));
+        var shortcuts = [["Home feed", "", TD.icons.home], ["Reels", "reels/", TD.icons.player], ["Explore", "explore/", TD.icons.browser], ["Messages", "direct/inbox/", TD.icons.keepup], ["Notifications", "notifications/", TD.icons.radio], ["@mitch_tdp", OWNER + "/", TD.icons.about]];
+        var g = TD.h("div", { "class": "folders", style: "grid-template-columns:repeat(auto-fill,minmax(170px,1fr))" });
+        shortcuts.forEach(function (sc) { g.appendChild(TD.h("div", { "class": "folder", onclick: function () { phone(sc[1]); } }, [TD.h("div", { "class": "fn", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", html: sc[2].replace("<svg", '<svg style="width:20px;height:20px;vertical-align:-4px;margin-right:8px"') + TD.esc(sc[0]) }), TD.h("div", { "class": "fc", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", text: "instagram.com/" + sc[1] })])); });
+        box.appendChild(g);
+        box.appendChild(TD.h("label", { style: "display:flex;gap:8px;align-items:center;margin-top:16px;color:var(--muted);font-size:13px" }, [auto, "Open Instagram automatically when this app opens"]));
+        box.appendChild(TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:6px", text: "If nothing opens, your browser blocked the pop-up — allow pop-ups for TDPlay OS. On phones it opens as a new tab." }));
+        main.appendChild(box);
       }
       function loading(msg) { return TD.h("div", { "class": "empty", text: msg || "Loading…" }); }
       function renderOwner() {
@@ -261,6 +292,11 @@
       render();
       if (params && params.post) { input.value = params.post; state.post = params.post; renderPost(); }
       else if (params && params.handle) win.showArtist(params.handle);
+      else if (TD.store.get("ig:autoOpen", true) !== false && !(params && params.noAuto)) {
+        // needs the click that opened the app (pop-up rules); silently skipped when opened programmatically
+        var w = null; try { w = window.open(IG, PHONE, "popup=yes,width=420,height=" + Math.min(820, (screen.availHeight || 900) - 60) + ",resizable=yes,scrollbars=yes"); } catch (e) { }
+        if (w) { try { w.focus(); } catch (e) { } }
+      }
     },
     resume: function (win, params) { if (params && params.handle) win.showArtist(params.handle); }
   });
