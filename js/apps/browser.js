@@ -20,12 +20,27 @@
       view.appendChild(start); view.appendChild(frame); view.appendChild(hint);
       app.appendChild(bar); app.appendChild(view); win.body.appendChild(app);
 
+      var isUrl = function (v) { return /^[a-z]+:\/\//i.test(v) || /^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(v); };
+      var matches = function (q) {
+        var qn = TD.norm(q); if (!qn) return [];
+        var toks = qn.split(" ");
+        return C.artists.filter(function (A) { return A.site && toks.every(function (t) { return A.norm.indexOf(t) !== -1 || (A.domain && A.domain.indexOf(t) !== -1) || TD.norm(A.initials) === t; }); })
+          .sort(function (a, b) { var as = a.norm.indexOf(qn) === 0 ? 0 : 1, bs = b.norm.indexOf(qn) === 0 ? 0 : 1; return as - bs || b.count - a.count; });
+      };
       url.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { url.value = ""; showStart(); return; }
         if (e.key !== "Enter") return;
         var v = url.value.trim(); if (!v) return;
-        if (/^[a-z]+:\/\//i.test(v) || /^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(v)) load(/^[a-z]+:\/\//i.test(v) ? v : "https://" + v);
-        else { var A = C.findArtist(v); if (A && A.site) load(A.site, false, A.name); else TD.notify("No artist site found", v); }
+        if (isUrl(v)) return load(/^[a-z]+:\/\//i.test(v) ? v : "https://" + v);
+        var A = matches(v)[0] || C.findArtist(v);
+        if (A && A.site) load(A.site, false, A.name); else TD.notify("No artist site found", v);
       });
+      // live filter: typing an artist name narrows the start page to matching sites
+      url.addEventListener("input", TD.debounce(function () {
+        var v = url.value.trim();
+        if (!v || isUrl(v)) { if (!v && frame.hidden) showStart(); return; }
+        showStart(v);
+      }, 60));
       url.addEventListener("focus", function () { url.select(); });
       function load(u, noHist, title) {
         clearTimeout(hintTimer);
@@ -53,9 +68,25 @@
           setTimeout(function () { hint.hidden = true; }, 9000);
         }, 2500);
       }
-      function showStart() {
-        clearTimeout(hintTimer); frame.hidden = true; frame.src = "about:blank"; start.hidden = false; hint.hidden = true; url.value = ""; win.setTitle("Browser");
-        TD.clear(start);
+      function tileFor(A) {
+        var blocked = C.frameable(A.site) === false;
+        var t = TD.h("div", { "class": "atile", title: A.domain + (blocked ? " · opens in a new tab" : ""), onclick: function () { load(A.site, false, A.name); } }, [
+          TD.avatar(A), TD.h("div", { "class": "nm", text: A.name }), TD.h("div", { "class": "ct", text: A.domain + (blocked ? " ↗" : "") })]);
+        return t;
+      }
+      function showStart(query) {
+        clearTimeout(hintTimer); frame.hidden = true; if (frame.src !== "about:blank") frame.src = "about:blank"; start.hidden = false; hint.hidden = true; win.setTitle("Browser");
+        if (!query) url.value = "";
+        TD.clear(start); start.scrollTop = 0;
+        if (query) {
+          var res = matches(query);
+          start.appendChild(TD.h("div", { "class": "sec-h" }, [TD.h("h2", { html: "Artists matching <em>" + TD.esc(query) + "</em>" }), TD.h("span", { "class": "muted", text: res.length ? TD.plural(res.length, "site") + " · Enter opens the first · Esc clears" : "no artist sites match" })]));
+          if (!res.length) { start.appendChild(TD.h("div", { "class": "empty", html: "Nothing for <b>" + TD.esc(query) + "</b>.<br><span class='dim'>Try initials, part of a name, or a domain like <b>linktr.ee</b>.</span>" })); return; }
+          var g = TD.h("div", { "class": "agrid" });
+          res.slice(0, 120).forEach(function (A) { g.appendChild(tileFor(A)); });
+          start.appendChild(g);
+          return;
+        }
         start.appendChild(TD.h("div", { "class": "sec-h" }, [TD.h("h1", { html: "Artist <em>Web</em>" }), TD.h("span", { "class": "muted", text: TD.plural(C.artists.filter(function (a) { return a.site; }).length, "artist website") + " · type an artist name above" })]));
         var sections = [
           { t: "Most featured", list: C.artists.filter(function (a) { return a.site && C.frameable(a.site) !== false; }).slice(0, 24) },
@@ -65,10 +96,7 @@
         sections.forEach(function (s) {
           start.appendChild(TD.h("div", { "class": "sec-h" }, [TD.h("h2", { text: s.t })]));
           var g = TD.h("div", { "class": "agrid" });
-          s.list.forEach(function (A) {
-            g.appendChild(TD.h("div", { "class": "atile", title: A.domain, onclick: function () { load(A.site, false, A.name); } }, [
-              TD.avatar(A), TD.h("div", { "class": "nm", text: A.name }), TD.h("div", { "class": "ct", text: A.domain })]));
-          });
+          s.list.forEach(function (A) { g.appendChild(tileFor(A)); });
           start.appendChild(g);
         });
       }
