@@ -14,17 +14,23 @@
   }
   function progress(f, msg) { $("boot-fill").style.width = Math.round(f * 100) + "%"; if (msg) $("boot-status").textContent = msg; }
 
-  // Browsers only allow full screen from a user gesture, so the first click anywhere is the trigger.
+  // Browsers only allow full screen from a user gesture, so ask — the "Full screen" button is the gesture.
   function armFullscreen() {
     if (!TD.store.get("fullscreenOnOpen", true)) return;
     if (!document.fullscreenEnabled || document.fullscreenElement) return;
-    var go = function (e) {
-      document.removeEventListener("pointerdown", go, true);
-      if (e.target.closest && e.target.closest("#tb-full")) return;        // that button handles itself
-      var p = document.documentElement.requestFullscreen({ navigationUI: "hide" });
-      if (p && p.then) p.then(function () { TD.notify("Full screen", "Press Esc to leave.", { ms: 2500 }); }).catch(function () { });
-    };
-    document.addEventListener("pointerdown", go, true);
+    TD.dialog({
+      icon: '<img src="assets/logo.png" alt="" style="border-radius:18px">',
+      title: "Go <em>full screen</em>?",
+      body: "TDPlay OS feels best filling the whole screen. Press Esc any time to leave.",
+      check: { label: "Don't ask again", fn: function () { TD.store.set("fullscreenOnOpen", false); } },
+      buttons: [
+        { label: "Full screen", primary: true, fn: function () {
+          var p = document.documentElement.requestFullscreen({ navigationUI: "hide" });
+          if (p && p.then) p.then(function () { TD.notify("Full screen", "Press Esc to leave.", { ms: 2500 }); }).catch(function () { TD.notify("Full screen", "Your browser didn't allow it here — use the ⤢ button in the top bar.", { ms: 4000 }); });
+        } },
+        { label: "Not now" }
+      ]
+    });
   }
   TD.armFullscreen = armFullscreen;
   function openFromHash() {

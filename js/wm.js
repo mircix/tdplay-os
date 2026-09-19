@@ -216,6 +216,29 @@
   };
   TD.closeMenu = function () { menuEl.hidden = true; };
 
+  // ---------------------------------------------------------------- dialogs
+  // TD.dialog({ icon, title, body, buttons: [{label, primary, fn}], check: {label, fn} }) → the overlay element
+  TD.dialog = function (o) {
+    var ov = TD.h("div", { "class": "dialog-ov" });
+    var close = function () { ov.classList.add("out"); setTimeout(function () { ov.remove(); }, 180); };
+    var checkEl = o.check ? TD.h("input", { type: "checkbox" }) : null;
+    var box = TD.h("div", { "class": "dialog glass" }, [
+      o.icon ? TD.h("div", { "class": "dialog-icon", html: o.icon }) : null,
+      TD.h("div", { "class": "dialog-title", html: o.title || "" }),
+      o.body ? TD.h("div", { "class": "dialog-body", html: o.body }) : null,
+      checkEl ? TD.h("label", { "class": "dialog-check" }, [checkEl, o.check.label]) : null,
+      TD.h("div", { "class": "dialog-btns" }, (o.buttons || []).map(function (b) {
+        return TD.h("button", { "class": "btn" + (b.primary ? " primary" : ""), text: b.label, onclick: function (e) { if (o.check && checkEl.checked) o.check.fn(); close(); if (b.fn) b.fn(e); } });
+      }))
+    ]);
+    ov.appendChild(box);
+    ov.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    document.getElementById("desktop").appendChild(ov);
+    var first = box.querySelector(".btn.primary") || box.querySelector(".btn"); if (first) first.focus();
+    ov.close = close;
+    return ov;
+  };
+
   // ---------------------------------------------------------------- toasts
   TD.notify = function (title, body, opts) {
     opts = opts || {};

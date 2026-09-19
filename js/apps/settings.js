@@ -59,8 +59,8 @@
           main.appendChild(TD.h("div", { "class": "swatches" }, [["red", "#ff2b2b"], ["pink", "#ff5cf0"], ["cyan", "#b1ffff"], ["gold", "#ffd166"], ["green", "#1ed760"]].map(function (a) { return TD.h("div", { "class": "sw" + (acc === a[0] ? " on" : ""), style: "background:" + a[1], title: a[0], onclick: function () { TD.setAccent(a[0]); render(); } }); })));
           main.appendChild(TD.h("h2", { text: "Full screen", style: "margin-top:20px" }));
           var fs = TD.h("input", { type: "checkbox", checked: !!TD.store.get("fullscreenOnOpen", true), onchange: function (e) { TD.store.set("fullscreenOnOpen", e.target.checked); if (e.target.checked) TD.armFullscreen(); } });
-          main.appendChild(TD.h("label", { style: "display:flex;gap:8px;align-items:center" }, [fs, "Go full screen on the first click (Esc leaves)"]));
-          main.appendChild(TD.h("div", { "class": "hint", text: "Browsers only allow full screen after a click or key press, so it can't happen the instant the page loads." }));
+          main.appendChild(TD.h("label", { style: "display:flex;gap:8px;align-items:center" }, [fs, "Ask to go full screen when TDPlay OS opens"]));
+          main.appendChild(TD.h("div", { "class": "hint", text: "Browsers only allow full screen after a click, so the OS asks instead of just doing it. Esc leaves full screen; the ⤢ button in the top bar toggles it any time." }));
           main.appendChild(TD.h("h2", { text: "Motion", style: "margin-top:20px" }));
           var rm = TD.h("input", { type: "checkbox", checked: !!TD.store.get("reduceMotion", false), onchange: function (e) { TD.store.set("reduceMotion", e.target.checked); document.documentElement.classList.toggle("reduce-motion", e.target.checked); } });
           main.appendChild(TD.h("label", { style: "display:flex;gap:8px;align-items:center" }, [rm, "Reduce motion (still wallpaper)"]));
