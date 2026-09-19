@@ -145,10 +145,17 @@
   function showPip(on) {
     pip.hidden = !on;
     layer.classList.toggle("pipmode", on); layer.classList.toggle("inwin", !on);
+    if (on) layer.style.zIndex = "";                 // PiP floats above everything (CSS)
     position();
+  }
+  // In the window the video must stack exactly with the Player window: same z-index as the window
+  // (the layer comes later in the DOM, so it paints over the window's slot) and below any window raised above it.
+  function syncZ() {
+    if (slotWin && pip.hidden) layer.style.zIndex = slotWin.el.style.zIndex || "10";
   }
   function position() {
     if (layer.hidden) return;
+    syncZ();
     var r;
     if (slot && slotWin && !slotWin.minimized) r = slot.getBoundingClientRect();
     else if (!pip.hidden) r = pipSlot.getBoundingClientRect();
@@ -194,7 +201,7 @@
     window.addEventListener("resize", position);
     TD.bus.on("wm:minimize", function (w) { if (w === slotWin) { showPip(true); } });
     TD.bus.on("wm:restore", function (w) { if (w === slotWin) { showPip(false); } });
-    TD.bus.on("wm:focus", function () { requestAnimationFrame(position); });
+    TD.bus.on("wm:focus", function () { syncZ(); requestAnimationFrame(position); });
     // keep the layer glued to its slot while windows move
     setInterval(function () { if (!layer.hidden && slot) position(); }, 120);
     if ("mediaSession" in navigator) {

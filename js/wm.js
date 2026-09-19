@@ -67,6 +67,10 @@
       if (focused === win && el.classList.contains("focused")) return;
       if (focused) focused.el.classList.remove("focused");
       focused = win; el.classList.add("focused"); el.style.zIndex = ++zTop;
+      if (zTop > 40) {                                   // keep windows under the top bar (50) and dock (60): renumber from 10
+        var sorted = TD.wins().sort(function (a, b) { return (parseInt(a.el.style.zIndex, 10) || 0) - (parseInt(b.el.style.zIndex, 10) || 0); });
+        zTop = 10; sorted.forEach(function (w) { w.el.style.zIndex = ++zTop; });
+      }
       topApp.textContent = nameEl.textContent;
       TD.bus.emit("wm:focus", win);
     };

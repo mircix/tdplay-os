@@ -143,8 +143,8 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .dock-sep{width:1px;height:40px;background:rgba(255,255,255,.14);margin:0 4px 6px;flex:none}
 
 /* ---------------------------------------------------------------- pip / yt layer */
-.yt-layer{position:fixed;z-index:45;background:#000;overflow:hidden;border-radius:10px}
-.yt-layer.inwin{z-index:45;border-radius:10px}
+.yt-layer{position:fixed;z-index:10;background:#000;overflow:hidden;border-radius:10px}
+.yt-layer.inwin{border-radius:10px}
 .yt-layer.pipmode{z-index:70;border-radius:12px 12px 0 0}
 #yt-host,#yt-host iframe{width:100%;height:100%;border:0;display:block}
 .pip{position:fixed;right:20px;bottom:calc(var(--dock) + 24px);width:min(480px,46vw);z-index:69;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 24px 70px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.16)}
