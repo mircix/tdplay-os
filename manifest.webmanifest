@@ -1,0 +1,15 @@
+{
+  "name": "TDPlay OS",
+  "short_name": "TDPlay OS",
+  "description": "A music desktop built on every song ever featured on tdplay.site.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#07070c",
+  "theme_color": "#07070c",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

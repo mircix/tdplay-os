@@ -17,7 +17,22 @@
   // Browsers only allow full screen from a user gesture, so ask — the "Full screen" button is the gesture.
   function armFullscreen() {
     if (!TD.store.get("fullscreenOnOpen", true)) return;
-    if (!document.fullscreenEnabled || document.fullscreenElement) return;
+    var standalone = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone), (display-mode: fullscreen)").matches);
+    if (standalone) return;
+    if (!document.fullscreenEnabled) {
+      // iPhone: Safari has no page full screen; "Add to Home Screen" opens the OS as an app without the browser bars
+      var ios = /iPhone|iPod/.test(navigator.userAgent) || (/iPad|Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+      if (!ios) return;
+      TD.dialog({
+        icon: '<img src="assets/logo.png" alt="" style="border-radius:18px">',
+        title: "Make it <em>full screen</em>",
+        body: "iPhone doesn't let web pages go full screen, but it does let you add this one to your Home Screen — then it opens like an app, without Safari's bars.<br><br><b>Tap the Share button</b> (the square with an arrow) → <b>Add to Home Screen</b> → <b>Add</b>.",
+        check: { label: "Don't show again", fn: function () { TD.store.set("fullscreenOnOpen", false); } },
+        buttons: [{ label: "Got it", cls: "gold" }]
+      });
+      return;
+    }
+    if (document.fullscreenElement) return;
     TD.dialog({
       icon: '<img src="assets/logo.png" alt="" style="border-radius:18px">',
       title: "Go <em>full screen</em>?",
