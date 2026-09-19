@@ -4,5 +4,5 @@
 window.TD_CONFIG = {
   spotifyClientId: "",     // from developer.spotify.com/dashboard (redirect URI: https://mircix.github.io/tdplay-os/)
   googleClientId: "",      // OAuth client ID from console.cloud.google.com (origin: https://mircix.github.io)
-  igApi: ""                // the Instagram worker URL, e.g. https://tdplay-ig.<you>.workers.dev (see worker/README.md)
+  igApi: "https://tdplay-ig.mrxsp08.workers.dev"   // the Instagram worker URL, e.g. https://tdplay-ig.<you>.workers.dev (see worker/README.md)
 };
