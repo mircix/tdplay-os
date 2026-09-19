@@ -42,10 +42,16 @@
   TD.openProfile = function (h, name) { TD.open("igprofile", { handle: h, name: name }); };
 
   TD.register({
-    id: "instagram", name: "Instagram", desc: "TDPlay and 180+ artists on Instagram", icon: TD.icons.instagram, width: 1000, height: 720, keywords: "instagram insta ig reels posts social",
+    id: "instagram", name: "Instagram", desc: "The real Instagram, in a phone window", icon: TD.icons.instagram, width: 1000, height: 720, keywords: "instagram insta ig reels posts social",
+    // the dock icon opens instagram.com itself (it can't be framed); the in-OS views live behind right-click / the launcher
+    launch: function () { if (!phone("")) TD.open("instagram", { noAuto: true }); },
+    menu: function () { return ["-",
+      { label: "TDPlay's profile & artists (in TDPlay OS)", icon: TD.icons.instagram, fn: function () { TD.open("instagram", { noAuto: true, tab: "tdplay" }); } },
+      { label: "Reels", fn: function () { phone("reels/"); } }, { label: "Explore", fn: function () { phone("explore/"); } },
+      { label: "Messages", fn: function () { phone("direct/inbox/"); } }, { label: "Notifications", fn: function () { phone("notifications/"); } }]; },
     mount: function (win, params) {
       var C = TD.catalog, IG = TD.ig;
-      var state = { tab: "home", q: "", post: "", profile: null };               // profile: {user, name, artist}
+      var state = { tab: (params && params.tab) || "home", q: "", post: "", profile: null };   // profile: {user, name, artist}
       var app = TD.h("div", { "class": "app" }), main = TD.h("div", { "class": "app-main", style: "padding:0" });
       var input = TD.h("input", { type: "search", placeholder: "Search artists, or paste a post / reel link…", autocomplete: "off", spellcheck: "false" });
       var tHome = TD.h("button", { "class": "tab on", html: IGLOGO(15) + " Home", onclick: function () { go("home"); } });
@@ -190,7 +196,6 @@
       function renderHome() {
         win.setTitle("Instagram");
         var box = TD.h("div", { style: "padding:22px 18px 24px" });
-        var auto = TD.h("input", { type: "checkbox", checked: TD.store.get("ig:autoOpen", true) !== false, onchange: function (e) { TD.store.set("ig:autoOpen", e.target.checked); } });
         box.appendChild(TD.h("div", { "class": "sp-now", style: "margin-bottom:18px;cursor:pointer", onclick: function () { phone(""); } }, [
           TD.h("div", { "class": "art", style: "background:none;box-shadow:none;display:flex;align-items:center;justify-content:center", html: IGLOGO(84) }),
           TD.h("div", { "class": "t" }, [
@@ -202,8 +207,7 @@
         var g = TD.h("div", { "class": "folders", style: "grid-template-columns:repeat(auto-fill,minmax(170px,1fr))" });
         shortcuts.forEach(function (sc) { g.appendChild(TD.h("div", { "class": "folder", onclick: function () { phone(sc[1]); } }, [TD.h("div", { "class": "fn", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", html: sc[2].replace("<svg", '<svg style="width:20px;height:20px;vertical-align:-4px;margin-right:8px"') + TD.esc(sc[0]) }), TD.h("div", { "class": "fc", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", text: "instagram.com/" + sc[1] })])); });
         box.appendChild(g);
-        box.appendChild(TD.h("label", { style: "display:flex;gap:8px;align-items:center;margin-top:16px;color:var(--muted);font-size:13px" }, [auto, "Open Instagram automatically when this app opens"]));
-        box.appendChild(TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:6px", text: "If nothing opens, your browser blocked the pop-up — allow pop-ups for TDPlay OS. On phones it opens as a new tab." }));
+        box.appendChild(TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:16px", text: "The Instagram icon in the dock opens this window directly. If nothing opens, your browser blocked the pop-up — allow pop-ups for TDPlay OS. On phones it opens as a new tab." }));
         main.appendChild(box);
       }
       function loading(msg) { return TD.h("div", { "class": "empty", text: msg || "Loading…" }); }
@@ -292,11 +296,7 @@
       render();
       if (params && params.post) { input.value = params.post; state.post = params.post; renderPost(); }
       else if (params && params.handle) win.showArtist(params.handle);
-      else if (TD.store.get("ig:autoOpen", true) !== false && !(params && params.noAuto)) {
-        // needs the click that opened the app (pop-up rules); silently skipped when opened programmatically
-        var w = null; try { w = window.open(IG, PHONE, "popup=yes,width=420,height=" + Math.min(820, (screen.availHeight || 900) - 60) + ",resizable=yes,scrollbars=yes"); } catch (e) { }
-        if (w) { try { w.focus(); } catch (e) { } }
-      }
+
     },
     resume: function (win, params) { if (params && params.handle) win.showArtist(params.handle); }
   });

@@ -178,6 +178,7 @@
       var b = TD.h("button", { "class": "dock-item", dataset: { app: id }, "aria-label": app.name }, [
         TD.h("span", { "class": "ic", html: app.icon }), TD.h("span", { "class": "lbl", text: app.name }), TD.h("span", { "class": "run" })]);
       b.addEventListener("click", function () {
+        if (app.launch) { b.classList.add("bounce"); setTimeout(function () { b.classList.remove("bounce"); }, 520); app.launch(); return; }
         var open = TD.wins().filter(function (w) { return w.app === app; });
         if (open.length && open.every(function (w) { return w.minimized; })) { open.forEach(function (w) { w.restore(); }); return; }
         if (open.length && focused && focused.app === app && open.length === 1 && !TD.isMobile()) { open[0].minimize(); return; }
@@ -277,7 +278,7 @@
     };
     var qn = TD.norm(q);
     var appHits = TD.apps().filter(function (a) { return !a.hidden && (!qn || TD.norm(a.name).indexOf(qn) !== -1 || (a.keywords || "").indexOf(qn) !== -1); })
-      .map(function (a) { return { icon: a.icon, title: TD.esc(a.name), sub: a.desc || "", k: "app", fn: function () { TD.open(a.id); } }; });
+      .map(function (a) { return { icon: a.icon, title: TD.esc(a.name), sub: a.desc || "", k: "app", fn: function () { if (a.launch) a.launch(); else TD.open(a.id); } }; });
     if (!qn) {
       add("Apps", appHits);
       if (C.ready) add("Jump to", [
