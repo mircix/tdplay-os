@@ -1,8 +1,6 @@
 /* Player — the YouTube player window: video, controls, queue, and your YouTube account */
 (function (TD) {
   "use strict";
-  var CLIENT_HELP = 'In <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console</a>: create a project → enable <b>YouTube Data API v3</b> → OAuth consent screen (External, add yourself as a test user) → Credentials → <b>OAuth client ID</b> → Web application → Authorized JavaScript origins: <code>' + TD.esc(location.origin) + '</code>. Copy the Client ID here.';
-
   // menu of the user's playlists → add one video
   TD.ytPickPlaylist = function (it, x, y) {
     TD.yt.loadPlaylists().then(function (pls) {
@@ -76,22 +74,11 @@
       var ytView = "playlists";
       function renderYt() {
         TD.clear(ytPane);
-        if (!Y.clientId()) {
-          var inp = TD.h("input", { "class": "input", type: "text", placeholder: "xxxxxxxx.apps.googleusercontent.com", spellcheck: "false", style: "font-family:var(--mono);font-size:12.5px;width:100%" });
-          ytPane.appendChild(TD.h("div", { style: "padding:10px 6px" }, [
-            TD.h("h2", { text: "Sign in to YouTube", style: "font-size:20px" }),
-            TD.h("p", { "class": "muted", style: "font-size:13.5px;margin:6px 0 10px", text: "Play your own playlists and liked videos here, and like / save / subscribe from the player. Google needs a one-time OAuth Client ID so it knows which app is asking:" }),
-            TD.h("p", { "class": "muted", style: "font-size:12.5px;line-height:1.6;margin:0 0 10px", html: CLIENT_HELP }),
-            TD.h("div", { "class": "field" }, [TD.h("label", { text: "Google OAuth Client ID" }), inp]),
-            TD.h("div", { "class": "pill-row" }, [TD.h("button", { "class": "btn primary", text: "Save & sign in", onclick: function () { if (!inp.value.trim()) return inp.focus(); Y.setClientId(inp.value); renderYt(); doSignIn(); } })])
-          ]));
-          return;
-        }
         if (!Y.signedIn) {
           ytPane.appendChild(TD.h("div", { "class": "empty" }, [
             TD.h("div", { style: "margin-bottom:12px", html: TD.icons.player.replace("<svg", '<svg style="width:64px;height:64px"') }),
             TD.h("button", { "class": "btn yt", style: "font-size:15px;padding:10px 18px", html: TD.icons.youtube + " Sign in with Google", onclick: doSignIn }),
-            TD.h("div", { "class": "dim", style: "margin-top:12px;font-size:12.5px" }, [TD.h("span", { text: "Client ID saved · " }), TD.h("a", { href: "#", text: "change", onclick: function (e) { e.preventDefault(); Y.setClientId(""); renderYt(); } })])
+            TD.h("div", { "class": "dim", style: "margin-top:12px;font-size:12.5px", text: "Your playlists, liked videos and subscriptions — playable right here." })
           ]));
           return;
         }

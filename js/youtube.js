@@ -6,7 +6,7 @@
   var API = "https://www.googleapis.com/youtube/v3/";
   var gisLoading = null, tokenClient = null, pending = null;
 
-  Y.clientId = function () { return TD.store.get("yt:clientId", ""); };
+  Y.clientId = function () { return TD.store.get("yt:clientId", "") || (window.TD_CONFIG && TD_CONFIG.googleClientId) || ""; };
   Y.setClientId = function (id) { TD.store.set("yt:clientId", (id || "").trim()); tokenClient = null; };
   function saved() { return TD.store.get("yt:token", null); }
 
@@ -51,7 +51,7 @@
     return request("");
   };
   Y.signIn = function () {
-    if (!Y.clientId()) return Promise.reject(new Error("Add your Google Client ID first"));
+    if (!Y.clientId()) return Promise.reject(new Error("YouTube sign-in isn't set up on this TDPlay OS yet."));
     return request("consent").then(function () { return Y.loadMe(); }).then(function () {
       Y.signedIn = true; TD.bus.emit("yt:state", Y);
       TD.notify("YouTube connected", Y.me ? Y.me.title : "Signed in", { icon: TD.icons.player, img: Y.me && Y.me.avatar });

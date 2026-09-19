@@ -5,7 +5,7 @@
   var SCOPES = "streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state playlist-modify-public playlist-modify-private user-library-modify user-library-read";
   var AUTH = "https://accounts.spotify.com";
 
-  S.clientId = function () { return TD.store.get("sp:clientId", ""); };
+  S.clientId = function () { return TD.store.get("sp:clientId", "") || (window.TD_CONFIG && TD_CONFIG.spotifyClientId) || ""; };
   S.redirectUri = function () { return location.origin + location.pathname.replace(/index\.html$/, ""); };
   S.tokens = function () { return TD.store.get("sp:tokens", null); };
 
@@ -14,7 +14,7 @@
   function b64url(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
   S.login = function () {
     var cid = S.clientId();
-    if (!cid) { TD.open("settings", { tab: "spotify" }); TD.notify("Spotify", "Paste your Spotify app Client ID in Settings first.", { icon: TD.icons.spotify }); return; }
+    if (!cid) { TD.notify("Spotify", "Spotify isn't set up on this TDPlay OS yet.", { icon: TD.icons.spotify }); return; }
     if (TD.embedded) {
       // Spotify won't show its sign-in inside a frame: run the whole flow in a popup of the standalone OS,
       // which posts the tokens back here when it's done (storage is partitioned inside the embed, so it can't just share localStorage).

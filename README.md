@@ -46,7 +46,7 @@ tdplay.site ──► mircix/tdplay-search (index rebuilt every 6 h) ──► d
 1. Open https://developer.spotify.com/dashboard → **Create app**.
 2. Any name (e.g. *TDPlay OS*). **Redirect URI:** `https://mircix.github.io/tdplay-os/`
    (add `http://127.0.0.1:8787/` too if you run it locally). Tick **Web Playback SDK** and **Web API**.
-3. Copy the **Client ID** into TDPlay OS → Settings → Spotify → Save → **Connect Spotify**.
+3. Put the **Client ID** in `js/config.js` (`spotifyClientId`) — it's a public identifier — and everyone just presses **Connect Spotify**. (Settings → Developer can override it per browser.)
 
 The sign-in stays in your browser (PKCE, no secret, no server).
 
@@ -60,14 +60,14 @@ button. Settings / sign-in made inside the site are stored separately from the s
 
 ## YouTube account (one-time)
 
-Player → **YouTube** tab → paste a Google OAuth Client ID → **Sign in with Google**. Then your
+Player → **YouTube** tab → **Sign in with Google**. Then your
 playlists (including the TDPlay monthly ones on your channel), liked videos and subscriptions
 are playable in the OS, and any song can be liked / added to a playlist from its right-click menu.
 
 1. https://console.cloud.google.com → create a project → **APIs & Services → Enable APIs → YouTube Data API v3**.
 2. **OAuth consent screen** → External → name + email → **Test users**: add your Google account.
 3. **Credentials → Create credentials → OAuth client ID → Web application** → Authorized JavaScript
-   origins: `https://mircix.github.io` (+ `http://localhost:8787` for local) → copy the **Client ID**.
+   origins: `https://mircix.github.io` (+ `http://localhost:8787` for local) → put the **Client ID** in `js/config.js` (`googleClientId`).
 
 Tokens come from Google's token flow (no secret, no server); they're renewed silently through
 your Google session. Writes cost YouTube API quota (50 units each of the 10,000/day).
