@@ -70,6 +70,7 @@
             }
           }
           if (TD.spotify.tokens()) TD.spotify.connect();
+          TD.yt.restore();
         });
       }, wait);
     }).catch(function (e) {

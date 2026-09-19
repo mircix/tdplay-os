@@ -58,6 +58,20 @@ opens in a pop-up (Spotify refuses to be framed), and the top bar gets an "open 
 button. Settings / sign-in made inside the site are stored separately from the standalone URL
 (browsers partition storage for embedded pages).
 
+## YouTube account (one-time)
+
+Player → **YouTube** tab → paste a Google OAuth Client ID → **Sign in with Google**. Then your
+playlists (including the TDPlay monthly ones on your channel), liked videos and subscriptions
+are playable in the OS, and any song can be liked / added to a playlist from its right-click menu.
+
+1. https://console.cloud.google.com → create a project → **APIs & Services → Enable APIs → YouTube Data API v3**.
+2. **OAuth consent screen** → External → name + email → **Test users**: add your Google account.
+3. **Credentials → Create credentials → OAuth client ID → Web application** → Authorized JavaScript
+   origins: `https://mircix.github.io` (+ `http://localhost:8787` for local) → copy the **Client ID**.
+
+Tokens come from Google's token flow (no secret, no server); they're renewed silently through
+your Google session. Writes cost YouTube API quota (50 units each of the 10,000/day).
+
 ## Run locally
 
 ```bash

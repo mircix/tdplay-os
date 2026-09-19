@@ -8,7 +8,7 @@
       var app = TD.h("div", { "class": "app" }), split = TD.h("div", { "class": "app-split" });
       var side = TD.h("div", { "class": "app-side", style: "width:170px" }), main = TD.h("div", { "class": "app-main" });
       split.appendChild(side); split.appendChild(main); app.appendChild(split); win.body.appendChild(app);
-      var tabs = [["spotify", "Spotify"], ["look", "Look & feel"], ["data", "Data"], ["about", "About"]];
+      var tabs = [["spotify", "Spotify"], ["youtube", "YouTube"], ["look", "Look & feel"], ["data", "Data"], ["about", "About"]];
       function renderSide() { TD.clear(side); tabs.forEach(function (t) { side.appendChild(TD.h("button", { "class": "side-item" + (state.tab === t[0] ? " active" : ""), text: t[1], onclick: function () { state.tab = t[0]; renderSide(); render(); } })); }); }
       function field(label, control, hint) { return TD.h("div", { "class": "field" }, [TD.h("label", { text: label }), control, hint ? TD.h("div", { "class": "hint", html: hint }) : null]); }
       function render() {
@@ -29,6 +29,24 @@
               : TD.h("button", { "class": "btn spotify", html: TD.icons.spotifyG + " Connect Spotify", disabled: !S.clientId(), onclick: function () { S.login(); } })
           ]));
           main.appendChild(TD.h("div", { "class": "muted", style: "margin-top:14px;font-size:12.5px", text: "Status: " + (S.connected ? "connected as " + (S.me ? (S.me.display_name || S.me.id) : "…") : S.tokens() ? "signed in, player not ready yet" : "not connected") + (TD.embedded ? " · inside tdplay.site the sign-in opens in a pop-up window" : "") }));
+        }
+        if (state.tab === "youtube") {
+          var Y = TD.yt;
+          main.appendChild(TD.h("h2", { text: "YouTube account" }));
+          main.appendChild(TD.h("p", { "class": "muted", html: "Sign in with Google to play your own playlists and liked videos in the Player, and to like / save / subscribe from it. The sign-in itself lives in <b>Player → YouTube</b>; this is just where the Client ID is kept." }));
+          main.appendChild(TD.h("ol", { "class": "muted", style: "padding-left:20px;font-size:13.5px;line-height:1.7", html:
+            '<a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">console.cloud.google.com</a> → create a project (any name).<br>' +
+            "APIs &amp; Services → <b>Enable APIs</b> → <b>YouTube Data API v3</b>.<br>" +
+            "OAuth consent screen → External → app name + your email → <b>Test users</b>: add your Google account.<br>" +
+            "Credentials → Create credentials → <b>OAuth client ID</b> → Web application → Authorized JavaScript origins: <code>https://mircix.github.io</code> (and <code>http://localhost:8787</code> for local runs) → copy the <b>Client ID</b>." }));
+          var ycid = TD.h("input", { "class": "input", type: "text", value: Y.clientId(), placeholder: "xxxxxxxx.apps.googleusercontent.com", spellcheck: "false", style: "font-family:var(--mono)" });
+          main.appendChild(field("Client ID", ycid));
+          main.appendChild(TD.h("div", { "class": "pill-row" }, [
+            TD.h("button", { "class": "btn primary", text: "Save", onclick: function () { Y.setClientId(ycid.value); TD.notify("Saved", "Google Client ID stored in this browser."); render(); } }),
+            Y.signedIn ? TD.h("button", { "class": "btn", text: "Sign out", onclick: function () { Y.signOut(); render(); } })
+              : TD.h("button", { "class": "btn yt", html: TD.icons.youtube + " Sign in with Google", disabled: !Y.clientId(), onclick: function () { Y.signIn().then(render).catch(function (e) { TD.notify("YouTube sign-in", e.message); }); } })
+          ]));
+          main.appendChild(TD.h("div", { "class": "muted", style: "margin-top:14px;font-size:12.5px", text: "Status: " + (Y.signedIn ? "signed in as " + ((Y.me && Y.me.title) || "…") : "not signed in") }));
         }
         if (state.tab === "look") {
           main.appendChild(TD.h("h2", { text: "Wallpaper" }));

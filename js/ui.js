@@ -79,8 +79,10 @@
     items.push("-");
     if (it.artistKey) items.push({ label: "Artist: " + (TD.catalog.artistByKey[it.artistKey] || {}).name, icon: TD.icons.artists, fn: function () { TD.open("artists", { artist: it.artistKey }); } });
     if (it.site) items.push({ label: "Artist website in Browser", icon: TD.icons.site, fn: function () { TD.open("browser", { url: it.site, title: it.artist }); } });
-    items.push({ label: "Open " + it.month.title, icon: TD.icons.home, fn: function () { TD.open("home", { month: it.month.key, page: it.page.page }); } });
-    items.push({ label: "Show on tdplay.site", icon: TD.icons.ext, fn: function () { window.open(it.url, "_blank"); } });
+    if (it.month && it.month.key) items.push({ label: "Open " + it.month.title, icon: TD.icons.home, fn: function () { TD.open("home", { month: it.month.key, page: it.page ? it.page.page : 1 }); } });
+    items.push({ label: it.external ? "Watch on YouTube" : "Show on tdplay.site", icon: TD.icons.ext, fn: function () { window.open(it.url, "_blank"); } });
+    if (TD.yt.signedIn && it.yt) items = items.concat(["-", { label: "Like on YouTube", icon: TD.icons.youtube, fn: function () { TD.yt.like(it.yt).then(function () { TD.notify("Liked on YouTube", it.caption, { img: TD.thumb(it) }); }).catch(function (e) { TD.notify("YouTube", e.message); }); } },
+      { label: "Add to a YouTube playlist…", icon: TD.icons.youtube, fn: function () { TD.ytPickPlaylist(it); } }]);
     if (opts.extra) items = items.concat(opts.extra(it));
     TD.menu(e.clientX, e.clientY, items);
   };

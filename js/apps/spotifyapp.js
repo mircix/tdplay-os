@@ -21,10 +21,15 @@
         } else if (S.tokens()) {
           bar.appendChild(TD.h("span", { "class": "chip", text: "Connecting…" }));
           bar.appendChild(TD.h("div", { style: "margin-left:auto" }, [TD.h("button", { "class": "btn sm", text: "Disconnect", onclick: function () { S.logout(); renderBar(); renderMain(); } })]));
-        } else {
+        } else if (S.clientId()) {
           bar.appendChild(TD.h("button", { "class": "btn spotify", html: TD.icons.spotifyG + " Connect Spotify Premium", onclick: function () { S.login(); } }));
-          bar.appendChild(TD.h("span", { "class": "muted", style: "font-size:12.5px", text: S.clientId() ? "Full tracks, your account, playlists — right here." : "Needs a Client ID in Settings → Spotify first." }));
-          if (!S.clientId()) bar.appendChild(TD.h("button", { "class": "btn sm", text: "Settings", onclick: function () { TD.open("settings", { tab: "spotify" }); } }));
+          bar.appendChild(TD.h("span", { "class": "muted", style: "font-size:12.5px", text: "Full tracks, your account, playlists — right here." }));
+        } else {
+          var cid = TD.h("input", { "class": "input", type: "text", placeholder: "Spotify app Client ID", spellcheck: "false", style: "font-family:var(--mono);font-size:12.5px;width:300px;max-width:100%" });
+          bar.appendChild(TD.h("span", { html: TD.icons.spotifyG.replace("<svg", '<svg style="width:20px;height:20px;fill:#1ed760;vertical-align:-5px"') }));
+          bar.appendChild(cid);
+          bar.appendChild(TD.h("button", { "class": "btn spotify", text: "Save & connect", onclick: function () { if (!cid.value.trim()) return cid.focus(); TD.store.set("sp:clientId", cid.value.trim()); renderBar(); S.login(); } }));
+          bar.appendChild(TD.h("span", { "class": "muted", style: "font-size:12.5px", html: 'Premium: create a free app at <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">developer.spotify.com</a> with redirect URI <code style="font-family:var(--mono)">' + TD.esc(S.redirectUri()) + "</code>, paste its Client ID." }));
         }
       }
       // ---- sidebar: months with Spotify playlists, years

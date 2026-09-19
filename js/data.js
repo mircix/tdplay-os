@@ -173,6 +173,7 @@
     C.months = Object.keys(months).map(function (k) { return months[k]; }).sort(function (a, b) { return b.sort - a.sort; });
     C.months.forEach(function (M) { M.pages.sort(function (a, b) { return a.page - b.page; }); M.count = M.items.length; C.monthByKey[M.key] = M; });
     C.items = items;
+    C.byYt = {}; items.forEach(function (it) { if (it.yt && !C.byYt[it.yt]) C.byYt[it.yt] = it; });
     C.years = [];
     var ymap = {};
     C.months.forEach(function (M) {
