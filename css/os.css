@@ -215,6 +215,8 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .btn:active{transform:scale(.97)}
 .btn.primary{background:var(--accent);border-color:transparent;color:#0a0a0f;font-weight:600}
 .btn.primary:hover{filter:brightness(1.08)}
+.btn.gold{background:var(--gold);border-color:transparent;color:#0a0a0f;font-weight:600;box-shadow:0 0 18px rgba(255,209,102,.35)}
+.btn.gold:hover{filter:brightness(1.06)}
 .btn.spotify{background:rgba(30,215,96,.16);border-color:rgba(30,215,96,.35);color:#5df095}
 .btn.spotify:hover{background:rgba(30,215,96,.28)}
 .btn.apple{background:rgba(250,60,90,.16);border-color:rgba(250,60,90,.35);color:#ff8aa0}

@@ -228,7 +228,7 @@
       o.body ? TD.h("div", { "class": "dialog-body", html: o.body }) : null,
       checkEl ? TD.h("label", { "class": "dialog-check" }, [checkEl, o.check.label]) : null,
       TD.h("div", { "class": "dialog-btns" }, (o.buttons || []).map(function (b) {
-        return TD.h("button", { "class": "btn" + (b.primary ? " primary" : ""), text: b.label, onclick: function (e) { if (o.check && checkEl.checked) o.check.fn(); close(); if (b.fn) b.fn(e); } });
+        return TD.h("button", { "class": "btn" + (b.primary ? " primary" : "") + (b.cls ? " " + b.cls : ""), text: b.label, onclick: function (e) { if (o.check && checkEl.checked) o.check.fn(); close(); if (b.fn) b.fn(e); } });
       }))
     ]);
     ov.appendChild(box);

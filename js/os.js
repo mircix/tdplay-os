@@ -24,7 +24,7 @@
       body: "TDPlay OS feels best filling the whole screen. Press Esc any time to leave.",
       check: { label: "Don't ask again", fn: function () { TD.store.set("fullscreenOnOpen", false); } },
       buttons: [
-        { label: "Full screen", primary: true, fn: function () {
+        { label: "Full screen", cls: "gold", fn: function () {
           var p = document.documentElement.requestFullscreen({ navigationUI: "hide" });
           if (p && p.then) p.then(function () { TD.notify("Full screen", "Press Esc to leave.", { ms: 2500 }); }).catch(function () { TD.notify("Full screen", "Your browser didn't allow it here — use the ⤢ button in the top bar.", { ms: 4000 }); });
         } },
