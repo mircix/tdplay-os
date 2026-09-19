@@ -3,9 +3,19 @@
 <div id="tdplay-os" style="background:#07070c;min-height:480px"></div>
 <script>
 (function () {
+  var OS = "https://mircix.github.io/tdplay-os/";
   var box = document.getElementById("tdplay-os");
+  // Phones: the OS wants the whole screen, so send the page itself to the standalone OS
+  // (this snippet runs same-origin with tdplay.site, so it may navigate the page; the OS inside a frame couldn't).
+  var narrow = false;
+  try { narrow = Math.min(window.top.innerWidth, window.top.screen.width) <= 720; } catch (e) { narrow = window.innerWidth <= 720; }
+  if (narrow) {
+    try { window.top.location.replace(OS); return; } catch (e) { }
+    box.innerHTML = '<a href="' + OS + '" style="display:block;padding:40px 20px;text-align:center;color:#fff;font:600 18px -apple-system,sans-serif;text-decoration:none">Open TDPlay OS →</a>';
+    box.style.minHeight = "0"; return;
+  }
   var f = document.createElement("iframe");
-  f.src = "https://mircix.github.io/tdplay-os/?embed=1";
+  f.src = OS + "?embed=1";
   f.title = "TDPlay OS";
   f.setAttribute("allow", "autoplay; encrypted-media; fullscreen; clipboard-write; picture-in-picture; web-share");
   f.setAttribute("allowfullscreen", "");
