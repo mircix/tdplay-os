@@ -120,7 +120,9 @@ window.TD = window.TD || {};
   };
   TD.appleEmbed = function (url) {
     if (!url) return "";
-    return url.replace(/^https?:\/\/music\.apple\.com\//, "https://embed.music.apple.com/").replace(/(\?|&)ls=1/, "$1");
+    var u = url.replace(/^https?:\/\/music\.apple\.com\//, "https://embed.music.apple.com/").replace(/[?&]ls=1(?=&|$)/, "");
+    u = u.replace(/[?&]theme=[a-z]+/, "");
+    return u + (u.indexOf("?") === -1 ? "?" : "&") + "theme=dark";        // Apple's embed honours theme=dark
   };
 
   // ---------------------------------------------------------------- store / bus
