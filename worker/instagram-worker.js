@@ -27,7 +27,7 @@ export default {
       if (p === "/") return json({ ok: true, service: "tdplay-ig", connected: !!(await getAuth(env)) }, cors);
       if (p === "/auth/start") return authStart(url, env);
       if (p === "/auth/callback") return authCallback(url, env);
-      if (p === "/status") { const a = await getAuth(env); return json({ connected: !!a, username: a && a.username, expires_at: a && a.expires_at }, cors); }
+      if (p === "/status") { const a = await getAuth(env); return json({ connected: !!a, username: a && a.username, expires_at: a && a.expires_at, token_set: !!env.IG_TOKEN, token_len: env.IG_TOKEN ? env.IG_TOKEN.length : 0, bootstrap_error: LAST_ERR || null }, cors); }
       const auth = await getAuth(env);
       if (!auth) return json({ error: "not_connected", message: "The owner hasn't connected Instagram yet." }, cors, 503);
       if (p === "/me") return json(await cached(env, "me", 600, () => graph(`/me?fields=id,user_id,${PROFILE_FIELDS},account_type`, auth)), cors);
@@ -99,15 +99,19 @@ async function getAuth(env) {
   // Bootstrap from a token generated in the Meta dashboard ("Generate access tokens → Add account"):
   // set the IG_TOKEN secret once; it's a 60-day token and the nightly cron keeps refreshing it.
   if (env.IG_TOKEN) {
-    const me = await fetch(`${GRAPH}/me?fields=id,user_id,username&access_token=${encodeURIComponent(env.IG_TOKEN)}`).then(r => r.json());
+    const tok = env.IG_TOKEN.trim();
+    const me = await fetch(`${GRAPH}/me?fields=id,user_id,username&access_token=${encodeURIComponent(tok)}`).then(r => r.json()).catch(e => ({ error: { message: String(e) } }));
     if (me && (me.user_id || me.id)) {
-      const auth = { access_token: env.IG_TOKEN, user_id: me.user_id || me.id, username: me.username || "", expires_at: Date.now() + 55 * 864e5 };
+      const auth = { access_token: tok, user_id: me.user_id || me.id, username: me.username || "", expires_at: Date.now() + 55 * 864e5 };
       await env.IG_KV.put("auth", JSON.stringify(auth));
+      LAST_ERR = null;
       return auth;
     }
+    LAST_ERR = (me && me.error && (me.error.message + (me.error.code ? " (code " + me.error.code + ")" : ""))) || "unexpected reply from Instagram";
   }
   return null;
 }
+let LAST_ERR = null;
 async function sign(env, msg) { const mac = await hmac(env, msg); return `${msg}.${mac}`; }
 async function verify(env, state) {
   const [msg, mac] = state.split("."); if (!msg || !mac) return false;
