@@ -15,8 +15,6 @@
       function item(label, n, fn, active) { side.appendChild(TD.h("button", { "class": "side-item" + (active ? " active" : ""), onclick: function () { fn(); split.classList.remove("show-side"); } }, [TD.h("span", { text: label }), n != null ? TD.h("span", { "class": "n", text: String(n) }) : null])); }
       function renderSide() {
         TD.clear(side);
-        side.appendChild(TD.h("div", { "class": "side-h", text: "Year playlists" }));
-        C.yearPlaylists.forEach(function (Y) { item("TDPlay " + Y.year, null, function () { set(Y.apple, "TDPlay " + Y.year); }, state.link === Y.apple); });
         side.appendChild(TD.h("div", { "class": "side-h", text: "Month playlists" }));
         C.months.forEach(function (M) { if (M.playlists.apple) item(M.key, M.count, function () { set(M.playlists.apple, M.title, null, M); }, state.link === M.playlists.apple); });
       }
@@ -26,13 +24,9 @@
         TD.clear(main); main.scrollTop = 0;
         if (!state.link) {
           win.setTitle("Apple Music");
-          main.appendChild(TD.h("div", { "class": "sec-h" }, [TD.h("h2", { text: "TDPlay on Apple Music" }), TD.h("span", { "class": "muted", text: "Pick a year or month playlist" })]));
-          var f = TD.h("div", { "class": "folders" });
-          C.yearPlaylists.forEach(function (Y) { f.appendChild(TD.h("div", { "class": "folder", onclick: function () { set(Y.apple, "TDPlay " + Y.year); } }, [TD.h("div", { "class": "fn", html: "TDPlay <em>" + Y.year + "</em>" }), TD.h("div", { "class": "fc", text: "Year playlist" })])); });
-          main.appendChild(f);
-          main.appendChild(TD.h("div", { "class": "sec-h" }, [TD.h("h2", { text: "Latest months" })]));
+          main.appendChild(TD.h("div", { "class": "sec-h" }, [TD.h("h2", { text: "TDPlay on Apple Music" }), TD.h("span", { "class": "muted", text: "Pick a month playlist" })]));
           var f2 = TD.h("div", { "class": "folders" });
-          C.months.filter(function (M) { return M.playlists.apple; }).slice(0, 12).forEach(function (M) { f2.appendChild(TD.h("div", { "class": "folder", onclick: function () { set(M.playlists.apple, M.title, null, M); } }, [TD.h("div", { "class": "fn", html: TD.esc(M.name) + " <em>'" + String(M.year).slice(2) + "</em>" }), TD.h("div", { "class": "fc", text: TD.plural(M.count, "song") })])); });
+          C.months.filter(function (M) { return M.playlists.apple; }).slice(0, 24).forEach(function (M) { f2.appendChild(TD.h("div", { "class": "folder", onclick: function () { set(M.playlists.apple, M.title, null, M); } }, [TD.h("div", { "class": "fn", html: TD.esc(M.name) + " <em>'" + String(M.year).slice(2) + "</em>" }), TD.h("div", { "class": "fc", text: TD.plural(M.count, "song") })])); });
           main.appendChild(f2);
           return;
         }
