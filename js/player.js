@@ -192,8 +192,7 @@
     layer.classList.toggle("fs", on);
     if (on) { layer.style.left = ""; layer.style.top = ""; layer.style.width = ""; layer.style.height = ""; layer.style.zIndex = ""; }
     else { requestAnimationFrame(position); }                 // also covers the page's own full screen changing the viewport
-    if (fsBtn) fsBtn.innerHTML = on ? ICON_EXIT : ICON_FS;
-    if (fsBtn) fsBtn.title = on ? "Exit full screen (Esc)" : "Full screen";
+    if (fsBtn) { fsBtn.innerHTML = on ? ICON_EXIT : ""; fsBtn.setAttribute("aria-label", on ? "Exit full screen" : "Full screen"); }
   }
 
   // ---------------------------------------------------------------- top bar / media session
@@ -217,14 +216,15 @@
     } catch (e) { }
   }
 
-  var ICON_FS = '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
-  var ICON_EXIT = '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+  // YouTube's own "exit full screen" glyph — arrows pointing back in
+  var ICON_EXIT = '<svg viewBox="0 0 24 24"><path d="M20 10h-6V4"/><path d="M14 10l6-6"/><path d="M4 14h6v6"/><path d="M10 14l-6 6"/></svg>';
   var fsBtn = null;
   P.init = function () {
     layer = $("yt-layer"); host = $("yt-host"); pip = $("pip"); pipSlot = $("pip-slot");
     // Our own full-screen toggle, on top of the video: it works whichever element the browser made
     // full screen (YouTube's own button or ours), so there is always a way back out.
-    fsBtn = TD.h("button", { "class": "yt-fs", title: "Full screen", html: ICON_FS, onclick: function (e) { e.stopPropagation(); P.fullscreen(); } });
+    // an invisible hit area over YouTube's own fullscreen control — the icon you see is YouTube's
+    fsBtn = TD.h("button", { "class": "yt-fs", "aria-label": "Full screen", onclick: function (e) { e.stopPropagation(); P.fullscreen(); } });
     layer.appendChild(fsBtn);
     document.addEventListener("fullscreenchange", onFsChange);
     document.addEventListener("webkitfullscreenchange", onFsChange);

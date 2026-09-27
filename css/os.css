@@ -148,13 +148,16 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .yt-layer:fullscreen{left:0;top:0;width:100vw;height:100vh;border-radius:0}
 .yt-layer:-webkit-full-screen{left:0;top:0;width:100vw;height:100vh;border-radius:0}
 #yt-host iframe:fullscreen{width:100vw;height:100vh}
-.yt-fs{position:absolute;top:10px;right:10px;z-index:3;width:34px;height:34px;padding:0;border:0;border-radius:9px;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s,background .15s;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.yt-fs svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.yt-layer:hover .yt-fs{opacity:.9}
-.yt-fs:hover{background:rgba(0,0,0,.8);opacity:1}
-.yt-layer.fs .yt-fs{opacity:0}
-.yt-layer.fs:hover .yt-fs{opacity:.9}
-.yt-layer.pipmode .yt-fs{width:28px;height:28px;top:6px;right:6px}
+/* Sits exactly on YouTube's own fullscreen control (48px in from the right edge, 103px up from the
+   bottom — the same at every player size). Out of full screen it is invisible, so the icon you see and
+   press is YouTube's own. In full screen YouTube's icon is stale (it doesn't know we did it), so ours
+   is drawn over it with the arrows the right way round. */
+.yt-fs{position:absolute;right:25px;bottom:80px;width:46px;height:46px;padding:0;border:0;border-radius:50%;background:transparent;z-index:3;cursor:pointer;-webkit-appearance:none;appearance:none;display:flex;align-items:center;justify-content:center}
+.yt-fs:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.yt-fs svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.yt-layer.fs .yt-fs{width:50px;height:50px;background:rgba(0,0,0,.72)}
+.yt-layer.fs .yt-fs:hover{background:rgba(0,0,0,.9)}
+.yt-layer.pipmode .yt-fs{display:none}
 .yt-layer.inwin{border-radius:10px}
 .yt-layer.pipmode{z-index:70;border-radius:12px 12px 0 0}
 #yt-host,#yt-host iframe{width:100%;height:100%;border:0;display:block}
