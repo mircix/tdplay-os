@@ -158,7 +158,9 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .yt-layer.fs .yt-fs{width:50px;height:50px;background:rgba(0,0,0,.72);opacity:0;transition:opacity .25s}
 .yt-layer.fs.fs-show .yt-fs{opacity:1}
 .yt-layer.fs .yt-fs:hover{background:rgba(0,0,0,.9);opacity:1}
-.yt-layer.pipmode .yt-fs{display:none}
+/* the picture-in-picture uses the same player layout, so the button works there too — and once it goes
+   full screen from the corner, it behaves exactly as it does from the Player window */
+.yt-layer.pipmode.fs{z-index:70;border-radius:0}
 .yt-layer.inwin{border-radius:10px}
 .yt-layer.pipmode{z-index:70;border-radius:12px 12px 0 0}
 #yt-host,#yt-host iframe{width:100%;height:100%;border:0;display:block}
