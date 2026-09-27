@@ -163,11 +163,14 @@
     if (slotWin && pip.hidden) layer.style.zIndex = slotWin.el.style.zIndex || "10";
   }
   function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+  // Only the VIDEO being full screen matters here. The OS page itself is often full screen too, and the
+  // layer must keep following the Player window in that case.
+  function videoFs() { var el = fsEl(); return !!el && (el === layer || layer.contains(el)); }
   function position() {
     if (layer.hidden) return;
-    // While a video is full screen the browser owns its geometry — writing left/top/width/height on the
+    // While the video is full screen the browser owns its geometry — writing left/top/width/height on the
     // layer every tick fights that and breaks YouTube's own exit button, so leave it alone until we're back.
-    if (fsEl()) return;
+    if (videoFs()) return;
     syncZ();
     var r;
     if (slot && slotWin && !slotWin.minimized) r = slot.getBoundingClientRect();
@@ -177,8 +180,7 @@
   }
   P.reposition = position;
   P.fullscreen = function () {
-    var el = fsEl();
-    if (el) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+    if (videoFs()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
     if (layer.hidden || !P.hasTrack()) return;
     var req = layer.requestFullscreen || layer.webkitRequestFullscreen;
     if (!req) { TD.notify("Full screen", "This browser won't allow full screen here.", { ms: 3000 }); return; }
@@ -186,10 +188,10 @@
     if (r && r.catch) r.catch(function () { TD.notify("Full screen", "Your browser blocked full screen.", { ms: 3000 }); });
   };
   function onFsChange() {
-    var on = !!fsEl();
+    var on = videoFs();
     layer.classList.toggle("fs", on);
     if (on) { layer.style.left = ""; layer.style.top = ""; layer.style.width = ""; layer.style.height = ""; layer.style.zIndex = ""; }
-    else { requestAnimationFrame(position); }
+    else { requestAnimationFrame(position); }                 // also covers the page's own full screen changing the viewport
     if (fsBtn) fsBtn.innerHTML = on ? ICON_EXIT : ICON_FS;
     if (fsBtn) fsBtn.title = on ? "Exit full screen (Esc)" : "Full screen";
   }
