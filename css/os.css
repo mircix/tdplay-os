@@ -155,8 +155,9 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .yt-fs{position:absolute;right:25px;bottom:80px;width:46px;height:46px;padding:0;border:0;border-radius:50%;background:transparent;z-index:3;cursor:pointer;-webkit-appearance:none;appearance:none;display:flex;align-items:center;justify-content:center}
 .yt-fs:focus-visible{outline:2px solid #fff;outline-offset:-2px}
 .yt-fs svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.yt-layer.fs .yt-fs{width:50px;height:50px;background:rgba(0,0,0,.72)}
-.yt-layer.fs .yt-fs:hover{background:rgba(0,0,0,.9)}
+.yt-layer.fs .yt-fs{width:50px;height:50px;background:rgba(0,0,0,.72);opacity:0;transition:opacity .25s}
+.yt-layer.fs.fs-show .yt-fs{opacity:1}
+.yt-layer.fs .yt-fs:hover{background:rgba(0,0,0,.9);opacity:1}
 .yt-layer.pipmode .yt-fs{display:none}
 .yt-layer.inwin{border-radius:10px}
 .yt-layer.pipmode{z-index:70;border-radius:12px 12px 0 0}

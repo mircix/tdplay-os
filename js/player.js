@@ -187,9 +187,22 @@
     var r = req.call(layer, { navigationUI: "hide" });
     if (r && r.catch) r.catch(function () { TD.notify("Full screen", "Your browser blocked full screen.", { ms: 3000 }); });
   };
+  // In full screen the button follows YouTube's controls: it fades out after 5s of playback and comes
+  // back on mouse movement, a key press, or when playback pauses (when YouTube shows its controls too).
+  var fsHideTimer = null;
+  function fsShow(autoHide) {
+    if (!videoFs()) return;
+    layer.classList.add("fs-show");
+    clearTimeout(fsHideTimer);
+    if (autoHide !== false) fsHideTimer = setTimeout(function () { layer.classList.remove("fs-show"); }, 5000);
+  }
+  P.fsShow = fsShow;
   function onFsChange() {
     var on = videoFs();
     layer.classList.toggle("fs", on);
+    clearTimeout(fsHideTimer);
+    layer.classList.remove("fs-show");
+    if (on) fsShow(P.state === "playing");
     if (on) { layer.style.left = ""; layer.style.top = ""; layer.style.width = ""; layer.style.height = ""; layer.style.zIndex = ""; }
     else { requestAnimationFrame(position); }                 // also covers the page's own full screen changing the viewport
     if (fsBtn) { fsBtn.innerHTML = on ? ICON_EXIT : ""; fsBtn.setAttribute("aria-label", on ? "Exit full screen" : "Full screen"); }
@@ -224,7 +237,17 @@
     // Our own full-screen toggle, on top of the video: it works whichever element the browser made
     // full screen (YouTube's own button or ours), so there is always a way back out.
     // an invisible hit area over YouTube's own fullscreen control — the icon you see is YouTube's
-    fsBtn = TD.h("button", { "class": "yt-fs", "aria-label": "Full screen", onclick: function (e) { e.stopPropagation(); P.fullscreen(); } });
+    fsBtn = TD.h("button", { "class": "yt-fs", "aria-label": "Full screen", onclick: function (e) {
+      e.stopPropagation();
+      if (videoFs() && !layer.classList.contains("fs-show")) { fsShow(P.state === "playing"); return; }   // hidden: first click just brings it back
+      P.fullscreen();
+    } });
+    fsBtn.addEventListener("mousemove", function () { fsShow(P.state === "playing"); });
+    fsBtn.addEventListener("mouseenter", function () { fsShow(P.state === "playing"); });
+    layer.addEventListener("mouseover", function () { fsShow(P.state === "playing"); });
+    document.addEventListener("mousemove", function () { if (videoFs()) fsShow(P.state === "playing"); });
+    document.addEventListener("keydown", function () { if (videoFs()) fsShow(P.state === "playing"); });
+    TD.bus.on("player:state", function (p) { if (videoFs()) fsShow(p.state === "playing"); });
     layer.appendChild(fsBtn);
     document.addEventListener("fullscreenchange", onFsChange);
     document.addEventListener("webkitfullscreenchange", onFsChange);
