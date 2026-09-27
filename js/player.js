@@ -27,7 +27,16 @@
           width: "100%", height: "100%",
           playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3, origin: location.origin, enablejsapi: 1 },
           events: {
-            onReady: function () { P.ready = true; resolve(yt); },
+            onReady: function () {
+              P.ready = true;
+              var f = host.querySelector("iframe");
+              if (f) {                                   // the API omits "fullscreen" from allow=; some browsers want it spelled out
+                var a = f.getAttribute("allow") || "";
+                if (a.indexOf("fullscreen") === -1) f.setAttribute("allow", (a ? a + "; " : "") + "fullscreen");
+                f.setAttribute("allowfullscreen", "");
+              }
+              resolve(yt);
+            },
             onStateChange: onState,
             onError: onError
           }
@@ -153,8 +162,12 @@
   function syncZ() {
     if (slotWin && pip.hidden) layer.style.zIndex = slotWin.el.style.zIndex || "10";
   }
+  function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
   function position() {
     if (layer.hidden) return;
+    // While a video is full screen the browser owns its geometry — writing left/top/width/height on the
+    // layer every tick fights that and breaks YouTube's own exit button, so leave it alone until we're back.
+    if (fsEl()) return;
     syncZ();
     var r;
     if (slot && slotWin && !slotWin.minimized) r = slot.getBoundingClientRect();
@@ -163,6 +176,23 @@
     layer.style.left = r.left + "px"; layer.style.top = r.top + "px"; layer.style.width = r.width + "px"; layer.style.height = r.height + "px";
   }
   P.reposition = position;
+  P.fullscreen = function () {
+    var el = fsEl();
+    if (el) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+    if (layer.hidden || !P.hasTrack()) return;
+    var req = layer.requestFullscreen || layer.webkitRequestFullscreen;
+    if (!req) { TD.notify("Full screen", "This browser won't allow full screen here.", { ms: 3000 }); return; }
+    var r = req.call(layer, { navigationUI: "hide" });
+    if (r && r.catch) r.catch(function () { TD.notify("Full screen", "Your browser blocked full screen.", { ms: 3000 }); });
+  };
+  function onFsChange() {
+    var on = !!fsEl();
+    layer.classList.toggle("fs", on);
+    if (on) { layer.style.left = ""; layer.style.top = ""; layer.style.width = ""; layer.style.height = ""; layer.style.zIndex = ""; }
+    else { requestAnimationFrame(position); }
+    if (fsBtn) fsBtn.innerHTML = on ? ICON_EXIT : ICON_FS;
+    if (fsBtn) fsBtn.title = on ? "Exit full screen (Esc)" : "Full screen";
+  }
 
   // ---------------------------------------------------------------- top bar / media session
   function updateTopbar() {
@@ -185,8 +215,17 @@
     } catch (e) { }
   }
 
+  var ICON_FS = '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  var ICON_EXIT = '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+  var fsBtn = null;
   P.init = function () {
     layer = $("yt-layer"); host = $("yt-host"); pip = $("pip"); pipSlot = $("pip-slot");
+    // Our own full-screen toggle, on top of the video: it works whichever element the browser made
+    // full screen (YouTube's own button or ours), so there is always a way back out.
+    fsBtn = TD.h("button", { "class": "yt-fs", title: "Full screen", html: ICON_FS, onclick: function (e) { e.stopPropagation(); P.fullscreen(); } });
+    layer.appendChild(fsBtn);
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
     P.shuffle = !!TD.store.get("shuffle", false); P.repeat = !!TD.store.get("repeat", false);
     $("pip-open").addEventListener("click", function () { TD.open("player"); });
     $("pip-toggle").addEventListener("click", P.toggle);
