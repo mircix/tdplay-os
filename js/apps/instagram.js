@@ -42,10 +42,11 @@
   TD.openProfile = function (h, name) { TD.open("igprofile", { handle: h, name: name }); };
 
   TD.register({
-    id: "instagram", name: "Instagram", desc: "TDPlay and 180+ artists on Instagram", icon: TD.icons.instagram, width: 1000, height: 720, keywords: "instagram insta ig reels posts social",
-    // opens as an OS window like the other apps; instagram.com itself (which can't be framed) is a click away
+    id: "instagram", name: "Instagram", desc: "The real Instagram, in a phone window", icon: TD.icons.instagram, width: 1000, height: 720, keywords: "instagram insta ig reels posts social",
+    // the dock icon opens instagram.com itself (it can't be framed); the in-OS views live behind right-click / the launcher
+    launch: function () { if (!phone("")) TD.open("instagram", { noAuto: true }); },
     menu: function () { return ["-",
-      { label: "Open the real Instagram", icon: TD.icons.ext, fn: function () { phone(""); } },
+      { label: "TDPlay's profile & artists (in TDPlay OS)", icon: TD.icons.instagram, fn: function () { TD.open("instagram", { noAuto: true, tab: "tdplay" }); } },
       { label: "Reels", fn: function () { phone("reels/"); } }, { label: "Explore", fn: function () { phone("explore/"); } },
       { label: "Messages", fn: function () { phone("direct/inbox/"); } }, { label: "Notifications", fn: function () { phone("notifications/"); } }]; },
     mount: function (win, params) {
@@ -206,7 +207,7 @@
         var g = TD.h("div", { "class": "folders", style: "grid-template-columns:repeat(auto-fill,minmax(170px,1fr))" });
         shortcuts.forEach(function (sc) { g.appendChild(TD.h("div", { "class": "folder", onclick: function () { phone(sc[1]); } }, [TD.h("div", { "class": "fn", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", html: sc[2].replace("<svg", '<svg style="width:20px;height:20px;vertical-align:-4px;margin-right:8px"') + TD.esc(sc[0]) }), TD.h("div", { "class": "fc", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", text: "instagram.com/" + sc[1] })])); });
         box.appendChild(g);
-        box.appendChild(TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:16px", text: "Instagram doesn't allow its pages inside other sites, so these open in a phone-sized window of their own. If nothing opens, your browser blocked the pop-up — allow pop-ups for TDPlay OS. On phones it opens as a new tab." }));
+        box.appendChild(TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:16px", text: "The Instagram icon in the dock opens this window directly. If nothing opens, your browser blocked the pop-up — allow pop-ups for TDPlay OS. On phones it opens as a new tab." }));
         main.appendChild(box);
       }
       function loading(msg) { return TD.h("div", { "class": "empty", text: msg || "Loading…" }); }
