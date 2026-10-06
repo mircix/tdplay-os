@@ -4,8 +4,8 @@ Docks Instagram in Chrome's side panel, beside whatever you're browsing — the 
 **Ask Gemini** opens. A button also swaps the panel to TDPlay OS itself.
 
 Instagram refuses to be shown inside another page (`X-Frame-Options: DENY`), which no website can
-override. An extension can: this one removes that header **only for its own panel frame**, and tells
-Instagram's frame-busting script that it is the top window.
+override. An extension can: this one removes that header **only for its own panel** — frames that belong
+to no browser tab — so instagram.com stays unframeable on every website you visit.
 
 ## Install (one minute, no Web Store)
 
@@ -19,4 +19,6 @@ Instagram's frame-busting script that it is the top window.
 - You stay signed in as yourself — it's the real instagram.com, just in the panel.
 - If Instagram shows a login screen even though you're signed in elsewhere, open
   `instagram.com` in a normal tab once, then reopen the panel.
-- The header rule is scoped to `instagram.com` sub-frames; nothing else on the web is affected.
+- The header rule only matches `instagram.com` frames outside any tab (the panel); Instagram inside
+  a website keeps its protection, and nothing else on the web is affected.
+- Updating: after pulling a new version, press the ⟳ on the extension's card in `chrome://extensions`.
