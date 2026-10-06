@@ -156,8 +156,8 @@ window.TD = window.TD || {};
   // ---------------------------------------------- Instagram in Chrome's side panel (chrome-sidepanel/)
   // instagram.com refuses to be framed, which no website can override, so the real site can only live in a
   // pop-up window — or, with the small TDPlay OS extension, docked in Chrome's side panel beside the OS.
-  // The extension answers { ping } and opens a path on { instagram }. Its id is fixed by the manifest "key";
-  // the Web Store build has its own id, so TD_CONFIG.sidePanelIds can list both.
+  // The extension marks this page and relays the click (bridge.js); it also answers { ping } by id, which is
+  // the older path and stays for the Web Store build (TD_CONFIG.sidePanelIds) in case the mark is missing.
   var IGURL = "https://www.instagram.com/";
   var SP_DEV = "dpaaikokdleaploelohifmeggbpaddcc";            // the unpacked build in chrome-sidepanel/
   function spIds() {
@@ -171,10 +171,14 @@ window.TD = window.TD || {};
     catch (e) { cb(null); }                                   // not Chrome, or no extension talks to this page
   }
   var spId = null;                                            // the id that answered
-  TD.sidePanel = false;                                       // true once the extension is there
+  // The extension marks TDPlay OS's own pages (bridge.js), which beats knowing its id: the unpacked build,
+  // the Web Store one and anything in between all mark the page the same way.
+  function bridged() { try { return document.documentElement.hasAttribute("data-tdplay-panel"); } catch (e) { return false; } }
+  TD.sidePanel = bridged();                                   // true once the extension is there
 
   // Ask every candidate id whether the extension is installed. Cheap, and the only way to notice an install.
   TD.sidePanelDetect = function (cb) {
+    if (bridged()) { TD.sidePanel = true; if (cb) cb(true); return; }
     if (!canTalk()) { if (cb) cb(false); return; }
     var ids = spIds(), left = ids.length, found = false;
     ids.forEach(function (id) {
@@ -187,7 +191,7 @@ window.TD = window.TD || {};
       });
     });
   };
-  if (canTalk()) TD.sidePanelDetect();
+  TD.sidePanelDetect();                                       // the mark is there from the start; a ping takes a moment
 
   // Worth offering the one-time install? Chrome on a computer, not installed yet, listing live, not refused.
   TD.sidePanelInstallable = function () {
@@ -195,10 +199,18 @@ window.TD = window.TD || {};
   };
 
   TD.openSidePanel = function (path) {                        // "" | "reels/" | "mitch_tdp/" | "p/<id>/"
+    path = path || "";
+    // The bridge is listening in this very click, which is the only moment Chrome will open a side panel.
+    if (bridged()) {
+      var root = document.documentElement;
+      root.setAttribute("data-tdplay-path", path);
+      root.dispatchEvent(new CustomEvent("tdplay-panel", { detail: path, bubbles: true }));
+      return true;
+    }
     if (!TD.sidePanel || !spId) return false;
     // Full screen stays as it is: the side panel sits beside a window the browser itself put full screen,
     // and leaving it for Instagram was worse than the panel being briefly out of sight.
-    spSend(spId, { instagram: path || "" }, function (r) {
+    spSend(spId, { instagram: path }, function (r) {
       if (!r || !r.ok) TD.notify("Instagram side panel", "Chrome didn't open it — click the TDPlay OS button in the toolbar.", { icon: TD.icons.instagram, ms: 5000 });
     });
     return true;

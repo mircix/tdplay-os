@@ -44,6 +44,9 @@ get *Add to Chrome* → Chrome's own confirmation → the card notices the insta
 - Updating: after pulling a new version, press the ⟳ on the extension's card in `chrome://extensions`.
   Coming from 1.0 / 1.1, **Remove** it and **Load unpacked** again instead: since 1.2 the extension has a
   fixed ID (the `key` in `manifest.json`), which is how TDPlay OS finds it.
+- Clicking Instagram in TDPlay OS opens the panel through `bridge.js`, which the extension puts into the
+  OS's own pages — so no extension id has to match, but the OS page has to be **reloaded** after you
+  install or reload the extension (content scripts only reach pages loaded afterwards).
 - Opening the panel starts at Instagram **Home**, wherever you left it last — unless TDPlay OS asked for a
   particular page (Reels, a profile), which it then opens instead.
 - If Instagram's app lands on “Sorry, this page isn't available” for a page that is fine, `recover.js`

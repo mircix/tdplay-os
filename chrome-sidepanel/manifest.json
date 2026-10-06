@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TDPlay OS — Instagram side panel",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxHCsFJjq3mJ7WPTkTh/WBgCS8oLmESNmvA3aKf71WjBnnsSeRPcVE/NsqHVePGqVmei0vVGOzSCIRJfgFYHWLPPaoMeXeUyFB5FdMdSrxH7X6qh6CFtrQIecKZKv+Rb85zsbhDT2xHGFS7DelvBHJJzvJj6U4p9SO2sktrBBHi+61N2V0z9zXEY/q795Xafm3+vYQi7AcWHf+/Gs1aWdULUqNvR9GKzCezybh2wKZ5jx53pJVFQBO750R3N51Qua7sqUqrZ+o6hwQoWz9P9ToyQBJ8syOcxorVkzP0Qr9Tc8wcHKGSCMOHkv77NllsLUWvQ30pgpmYMzmGzrh2D/QQIDAQAB",
   "description": "Docks Instagram (and TDPlay OS) in Chrome's side panel, the way Ask Gemini docks.",
   "icons": { "16": "icon16.png", "32": "icon32.png", "48": "icon48.png", "128": "icon128.png" },
@@ -11,7 +11,8 @@
   "permissions": ["sidePanel", "declarativeNetRequestWithHostAccess", "storage"],
   "host_permissions": ["https://*.instagram.com/*", "https://mircix.github.io/*"],
   "content_scripts": [
-    { "matches": ["https://*.instagram.com/*"], "all_frames": true, "run_at": "document_idle", "js": ["recover.js"] }
+    { "matches": ["https://*.instagram.com/*"], "all_frames": true, "run_at": "document_idle", "js": ["recover.js"] },
+    { "matches": ["https://mircix.github.io/*", "http://localhost/*", "http://127.0.0.1/*"], "all_frames": true, "run_at": "document_start", "js": ["bridge.js"] }
   ],
   "externally_connectable": { "matches": ["https://mircix.github.io/*", "http://127.0.0.1/*", "http://localhost/*"] }
 }
