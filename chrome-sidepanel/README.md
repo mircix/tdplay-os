@@ -19,4 +19,5 @@ Instagram's frame-busting script that it is the top window.
 - You stay signed in as yourself — it's the real instagram.com, just in the panel.
 - If Instagram shows a login screen even though you're signed in elsewhere, open
   `instagram.com` in a normal tab once, then reopen the panel.
-- The header rule is scoped to `instagram.com` sub-frames; nothing else on the web is affected.
+- The header rule is off by default and only switched on **while the panel is open**, and it only applies
+  to `instagram.com` frames — so Instagram keeps its normal frame protection everywhere else.

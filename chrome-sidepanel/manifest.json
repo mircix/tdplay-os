@@ -1,15 +1,40 @@
 {
   "manifest_version": 3,
-  "name": "TDPlay OS — Instagram side panel",
+  "name": "TDPlay OS \u2014 Instagram side panel",
   "version": "1.0.0",
   "description": "Docks Instagram (and TDPlay OS) in Chrome's side panel, the way Ask Gemini docks.",
-  "icons": { "16": "icon16.png", "32": "icon32.png", "48": "icon48.png", "128": "icon128.png" },
-  "action": { "default_title": "Instagram side panel" },
-  "side_panel": { "default_path": "panel.html" },
-  "background": { "service_worker": "sw.js" },
-  "permissions": ["sidePanel", "declarativeNetRequestWithHostAccess", "scripting", "storage"],
-  "host_permissions": ["https://*.instagram.com/*", "https://mircix.github.io/*"],
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_title": "Instagram side panel"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "permissions": [
+    "sidePanel",
+    "declarativeNetRequestWithHostAccess",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*.instagram.com/*",
+    "https://mircix.github.io/*"
+  ],
   "declarative_net_request": {
-    "rule_resources": [{ "id": "frameable", "enabled": true, "path": "rules.json" }]
+    "rule_resources": [
+      {
+        "id": "frameable",
+        "enabled": false,
+        "path": "rules.json"
+      }
+    ]
   }
 }
