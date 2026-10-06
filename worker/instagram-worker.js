@@ -9,6 +9,8 @@
  *   KV namespace  IG_KV
  *   secret        IG_TOKEN        (simplest: the token from the Meta dashboard's "Generate access tokens")
  *   secrets       IG_APP_ID, IG_APP_SECRET, ADMIN_KEY   (only for the /auth/start browser sign-in instead)
+ *   secrets       FB_APP_ID, FB_APP_SECRET                (artist look-ups: Business Discovery needs Facebook login)
+ *   owner link    GET /fb/start?key=<ADMIN_KEY> -> Facebook -> /fb/callback  (stores a Page token that never expires)
  *   variable      ALLOWED_ORIGINS = https://mircix.github.io,http://localhost:8787
  *   cron trigger  0 3 * * *   (refreshes the 60-day token)
  */
@@ -27,7 +29,13 @@ export default {
       if (p === "/") return json({ ok: true, service: "tdplay-ig", connected: !!(await getAuth(env)) }, cors);
       if (p === "/auth/start") return authStart(url, env);
       if (p === "/auth/callback") return authCallback(url, env);
-      if (p === "/status") { const a = await getAuth(env); return json({ connected: !!a, username: a && a.username, expires_at: a && a.expires_at, token_set: !!env.IG_TOKEN, token_len: env.IG_TOKEN ? env.IG_TOKEN.length : 0, bootstrap_error: LAST_ERR || null }, cors); }
+      if (p === "/fb/start") return fbStart(url, env);
+      if (p === "/fb/callback") return fbCallback(url, env);
+      if (p === "/status") {
+        const a = await getAuth(env), fb = await getFb(env);
+        return json({ connected: !!a, username: a && a.username, expires_at: a && a.expires_at, token_set: !!env.IG_TOKEN,
+          artists: !!fb, page: fb && fb.page, ig_user_id: fb && fb.ig_user_id, bootstrap_error: LAST_ERR || null }, cors);
+      }
       const auth = await getAuth(env);
       if (!auth) return json({ error: "not_connected", message: "The owner hasn't connected Instagram yet." }, cors, 503);
       if (p === "/me") return json(await cached(env, "me", 600, () => graph(`/me?fields=id,user_id,${PROFILE_FIELDS},account_type`, auth)), cors);
@@ -38,13 +46,14 @@ export default {
       let m;
       if ((m = p.match(/^\/discover\/([A-Za-z0-9._]{1,30})$/))) {
         const user = m[1].toLowerCase(), after = url.searchParams.get("after") || "";
-        const data = await cached(env, `bd2:${user}:${after}`, 3600, async () => {
+        const fb = await getFb(env);
+        if (!fb) return json({ unavailable: true, reason: "Artist look-ups need the Facebook login step (see /fb/start)." }, cors, 404);
+        const data = await cached(env, `bd3:${user}:${after}`, 3600, async () => {
           const q = `business_discovery.username(${user}){${PROFILE_FIELDS},media.limit(24)${after ? `.after(${after})` : ""}{${MEDIA_FIELDS}}}`;
-          // with Instagram Login the app user's node is `me` (the numeric IG user id is a different node type)
-          const r = await graph(`/me?fields=${encodeURIComponent(q)}`, auth, true);
+          const r = await fbGraph(`/${fb.ig_user_id}?fields=${encodeURIComponent(q)}`, fb.token);
           if (r.error) {
             const code = r.error.code, msg = r.error.message || "";
-            if (code === 110 || /business|creator|not found|cannot be found|does not exist/i.test(msg)) return { unavailable: true, reason: msg };
+            if (code === 110 || /business|creator|not found|cannot be found|does not exist|does not have/i.test(msg)) return { unavailable: true, reason: msg };
             throw new Error(msg);
           }
           return r.business_discovery;
@@ -123,6 +132,42 @@ async function hmac(env, msg) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.IG_APP_SECRET + env.ADMIN_KEY), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(msg));
   return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+// ---------------------------------------------------------------- facebook login (artist look-ups)
+const FB = "https://graph.facebook.com/v23.0";
+function fbRedirect(url) { return `${url.origin}/fb/callback`; }
+const FB_SCOPE = "instagram_basic,instagram_manage_insights,pages_show_list,pages_read_engagement,business_management";
+async function fbStart(url, env) {
+  if (url.searchParams.get("key") !== env.ADMIN_KEY) return new Response("Forbidden", { status: 403 });
+  if (!env.FB_APP_ID || !env.FB_APP_SECRET) return page("Set the FB_APP_ID and FB_APP_SECRET secrets on this worker first.", 400);
+  const state = await sign(env, String(Date.now()));
+  const q = new URLSearchParams({ client_id: env.FB_APP_ID, redirect_uri: fbRedirect(url), state, scope: FB_SCOPE, response_type: "code" });
+  return Response.redirect("https://www.facebook.com/v23.0/dialog/oauth?" + q.toString(), 302);
+}
+async function fbCallback(url, env) {
+  if (url.searchParams.get("error")) return page(`Facebook said: ${url.searchParams.get("error_description") || url.searchParams.get("error")}`);
+  const code = url.searchParams.get("code") || "", state = url.searchParams.get("state") || "";
+  if (!code || !(await verify(env, state))) return page("Missing or invalid state — start again from /fb/start?key=…", 400);
+  const short = await fetch(`${FB}/oauth/access_token?` + new URLSearchParams({ client_id: env.FB_APP_ID, client_secret: env.FB_APP_SECRET, redirect_uri: fbRedirect(url), code })).then(r => r.json());
+  if (!short.access_token) return page("Token exchange failed: " + JSON.stringify(short.error || short), 502);
+  // long-lived user token -> page token (page tokens from a long-lived user token don't expire)
+  const long = await fetch(`${FB}/oauth/access_token?` + new URLSearchParams({ grant_type: "fb_exchange_token", client_id: env.FB_APP_ID, client_secret: env.FB_APP_SECRET, fb_exchange_token: short.access_token })).then(r => r.json());
+  const userToken = long.access_token || short.access_token;
+  const accounts = await fetch(`${FB}/me/accounts?fields=name,access_token,instagram_business_account{id,username}&access_token=${encodeURIComponent(userToken)}`).then(r => r.json());
+  const withIg = (accounts.data || []).filter(a => a.instagram_business_account);
+  if (!withIg.length) return page("No Facebook Page on this account is connected to an Instagram professional account. Link them in Instagram → Settings → Accounts Centre, then try again." + (accounts.error ? " (" + accounts.error.message + ")" : ""), 400);
+  const a = withIg[0];
+  await env.IG_KV.put("fb", JSON.stringify({ token: a.access_token, page: a.name, page_id: a.id, ig_user_id: a.instagram_business_account.id, ig_username: a.instagram_business_account.username, saved_at: Date.now() }));
+  return page(`Artist look-ups are on: Page “${a.name}” → @${a.instagram_business_account.username}. You can close this window.`);
+}
+async function getFb(env) {
+  const v = await env.IG_KV.get("fb");
+  return v ? JSON.parse(v) : null;
+}
+async function fbGraph(path, token) {
+  const sep = path.includes("?") ? "&" : "?";
+  return fetch(`${FB}${path}${sep}access_token=${encodeURIComponent(token)}`).then(r => r.json());
 }
 
 // ---------------------------------------------------------------- graph + cache

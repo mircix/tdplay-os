@@ -31,6 +31,21 @@ With this you can skip the redirect URI / `/auth/start` steps entirely.
 
 `GET https://<worker>/status` shows whether it's connected.
 
+## Artist look-ups (Business Discovery)
+
+Looking up *other* Instagram accounts needs Meta's **Facebook login**, not the Instagram one, and a Facebook
+Page linked to @mitch_tdp. One-time:
+
+1. Meta app → **App settings → Basic**: copy the **App ID** and **App secret** (click *Show*).
+2. Cloudflare worker → *Settings → Variables and Secrets*: add secrets **`FB_APP_ID`** and **`FB_APP_SECRET`**.
+3. Meta app → **Facebook Login for Business → Settings**: add **`https://<worker>/fb/callback`** to
+   *Valid OAuth Redirect URIs* and save.
+4. Open **`https://<worker>/fb/start?key=<ADMIN_KEY>`**, approve on Facebook. The worker exchanges the code
+   for a long-lived user token, picks the Page that has an Instagram account attached, and stores that
+   **Page token (which never expires)** plus the Instagram user id in KV.
+
+`GET /status` then reports `artists: true` with the Page name.
+
 ## Endpoints
 
 | | |
