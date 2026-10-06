@@ -1,4 +1,4 @@
-# TDPlay OS — Instagram side panel (Chrome)
+# TDPlay OS — Side Panel for Instagram (Chrome)
 
 Docks Instagram in Chrome's side panel, beside whatever you're browsing — the same place
 **Ask Gemini** opens. A button also swaps the panel to TDPlay OS itself, and with the extension installed,
@@ -32,7 +32,7 @@ get *Add to Chrome* → Chrome's own confirmation → the card notices the insta
 1. Chrome → `chrome://extensions`
 2. Turn on **Developer mode** (top right)
 3. **Load unpacked** → choose this `chrome-sidepanel` folder
-4. Pin "TDPlay OS — Instagram side panel" to the toolbar; click it to open the panel
+4. Pin "TDPlay OS — Side Panel for Instagram" to the toolbar; click it to open the panel
 
 ## Notes
 

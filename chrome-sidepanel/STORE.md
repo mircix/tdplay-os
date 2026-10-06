@@ -21,7 +21,7 @@ python3 tools/pack_extension.py --version 1.2.0
 
 | Field | Value |
 | --- | --- |
-| **Name** | `TDPlay OS — Instagram side panel` |
+| **Name** | `TDPlay OS — Side Panel for Instagram` |
 | **Summary** (132 max) | `Dock the real Instagram in Chrome's side panel, beside whatever you're browsing — and beside TDPlay OS.` |
 | **Category** | Social & Communication |
 | **Language** | English (United Kingdom) |
