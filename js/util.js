@@ -126,14 +126,43 @@ window.TD = window.TD || {};
   };
 
   // A phone-shaped popup window (real site, no toolbar) — used for Instagram, which refuses to load inside other pages.
+  var phoneWin = null, phoneWatch = null, phoneTookFs = false;
+  // The pop-up can end up behind the OS (macOS switches spaces when full screen ends), so keep raising it.
+  function raisePhone() { try { if (phoneWin && !phoneWin.closed) phoneWin.focus(); } catch (e) { } }
+  function watchPhone() {
+    clearInterval(phoneWatch);
+    phoneWatch = setInterval(function () {
+      if (phoneWin && !phoneWin.closed) return;
+      clearInterval(phoneWatch); phoneWatch = null; phoneWin = null;
+      if (phoneTookFs) { phoneTookFs = false; TD.restoreFullscreen(); }
+    }, 600);
+  }
+  // Full screen can only be re-entered from a gesture, so the next click or key press in the OS does it.
+  TD.restoreFullscreen = function () {
+    if (document.fullscreenElement || !document.fullscreenEnabled) return;
+    var go = function () {
+      document.removeEventListener("pointerdown", go, true); document.removeEventListener("keydown", go, true);
+      var p = document.documentElement.requestFullscreen ? document.documentElement.requestFullscreen({ navigationUI: "hide" }) : null;
+      if (p && p.catch) p.catch(function () { });
+    };
+    document.addEventListener("pointerdown", go, true);
+    document.addEventListener("keydown", go, true);
+    TD.notify("Back to TDPlay OS", "Click anywhere to return to full screen.", { ms: 4500 });
+  };
+  document.addEventListener("fullscreenchange", function () {
+    if (!document.fullscreenElement) setTimeout(raisePhone, 250);      // bring Instagram back to the front
+  });
+  window.addEventListener("focus", function () { if (phoneTookFs) setTimeout(raisePhone, 150); });
+
   TD.phoneWindow = function (url, name) {
     function open() {
       var w = 420, h = Math.min(820, (screen.availHeight || 900) - 60);
       var left = Math.round((window.screenX || 0) + ((window.outerWidth || screen.width) - w) / 2);
       var top = Math.round((window.screenY || 0) + Math.max(0, ((window.outerHeight || screen.height) - h) / 2));
       var win = window.open(url, name || "tdos-phone", "popup=yes,width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",resizable=yes,scrollbars=yes");
-      if (!win) { TD.notify("Pop-up blocked", "Allow pop-ups for TDPlay OS to open this in a phone window.", { ms: 4000 }); return win; }
-      try { win.focus(); } catch (e) { }
+      if (!win) { TD.notify("Pop-up blocked", "Allow pop-ups for TDPlay OS to open this in a phone window.", { ms: 4000 }); phoneTookFs = false; return win; }
+      phoneWin = win; watchPhone();
+      [0, 150, 450, 1000].forEach(function (d) { setTimeout(raisePhone, d); });   // survive the space switch
       // a window opened from a full-screen page can come up filling the screen — put it back to phone size
       setTimeout(function () {
         try {
@@ -147,6 +176,7 @@ window.TD = window.TD || {};
     // over the whole display instead of being a phone-sized window beside the OS.
     var fs = document.fullscreenElement || document.webkitFullscreenElement;
     if (fs) {
+      phoneTookFs = true;                                   // remember to put the OS back when it closes
       var p;
       try { p = (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { }
       if (p && p.then) { p.then(open, open); return { deferred: true }; }
