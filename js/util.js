@@ -193,9 +193,10 @@ window.TD = window.TD || {};
   };
   TD.sidePanelDetect();                                       // the mark is there from the start; a ping takes a moment
 
-  // Worth offering the one-time install? Chrome on a computer, not installed yet, listing live, not refused.
+  // Worth offering the one-time install? A Chromium browser on a computer, not installed, not refused.
+  function chromium() { var ua = navigator.userAgent; return /Chrome\/|Chromium\/|Edg\//.test(ua) && !/Mobile|Android/.test(ua); }
   TD.sidePanelInstallable = function () {
-    return !!(spStore() && canTalk() && !TD.sidePanel && !TD.isMobile() && !TD.store.get("sidePanelNo", false));
+    return !!(chromium() && canTalk() && !TD.sidePanel && !TD.isMobile() && !TD.store.get("sidePanelNo", false));
   };
 
   TD.openSidePanel = function (path) {                        // "" | "reels/" | "mitch_tdp/" | "p/<id>/"
@@ -211,17 +212,19 @@ window.TD = window.TD || {};
     // Full screen stays as it is: the side panel sits beside a window the browser itself put full screen,
     // and leaving it for Instagram was worse than the panel being briefly out of sight.
     spSend(spId, { instagram: path }, function (r) {
-      if (!r || !r.ok) TD.notify("Instagram side panel", "Chrome didn't open it — click the TDPlay OS button in the toolbar.", { icon: TD.icons.instagram, ms: 5000 });
+      if (!r || !r.ok) TD.notify("Instagram side panel", "Chrome didn't open it \u2014 click the TDPlay OS button in the toolbar.", { icon: TD.icons.instagram, ms: 5000 });
     });
     return true;
   };
 
-  // "Instagram is getting ready": the one-time install card. Chrome only installs an extension after the
-  // visitor presses Add to Chrome in the Web Store and confirms — no website can do it for them — so the
-  // card walks them through it and notices by itself when it lands.
+  // "Install Instagram to continue": the one-time install. No website can install an extension by itself \u2014
+  // the browser asks the visitor to confirm, always \u2014 so the card walks them through it, notices when it
+  // lands, and opens Instagram straight after.
+  var HELP = "https://github.com/mircix/tdplay-os/tree/main/chrome-sidepanel";
   var spCard = null;
-  TD.sidePanelSetup = function (path) {
-    if (spCard) return spCard;
+  TD.sidePanelSetup = function (path, installed) {
+    if (spCard && spCard.isConnected) return spCard;
+    spCard = null;                                            // the last one is gone from the page
     path = path || "";
     var icon = TD.h("div", { "class": "dialog-icon", html: TD.icons.instagram });
     var title = TD.h("div", { "class": "dialog-title" });
@@ -240,17 +243,28 @@ window.TD = window.TD || {};
       if (decline) TD.store.set("sidePanelNo", true);          // don't offer again; the app's menu still can
       close(); TD.phoneWindowDirect(IGURL + path, "ig-phone");
     }
+    // An extension only reaches pages opened after it was installed, so a page that was already open has to
+    // come back once before it can talk to the panel. Remember what was asked for across that reload.
+    function reloadInto() { TD.store.set("spOpen", path); location.reload(); }
     function ready() {
       clearInterval(timer);
       title.innerHTML = "Instagram is <em>ready</em>";
-      body.innerHTML = "The panel is installed. From here on Instagram opens in Chrome's side panel beside TDPlay OS \u2014 the dock icon, Reels, Explore and DMs all land there.";
-      buttons([{ label: "Open Instagram", cls: "gold", fn: function () { close(); TD.openSidePanel(path); } }]);
+      if (bridged()) {
+        body.innerHTML = "Installed. Instagram opens in the panel beside TDPlay OS from here on \u2014 the dock icon, Reels, Explore and DMs all land there.";
+        buttons([{ label: "Open Instagram", cls: "gold", fn: function () { close(); TD.openSidePanel(path); } }]);
+      } else {
+        body.innerHTML = "Installed. TDPlay OS comes back once so the panel can hear it, then Instagram opens.";
+        buttons([{ label: "Open Instagram", cls: "gold", fn: reloadInto }]);
+      }
     }
     function waiting() {
-      title.innerHTML = "Instagram is <em>getting ready</em>";
-      body.innerHTML = '<div class="sp-wait"><span class="sp-ring"></span>Waiting for Chrome\u2026</div>' +
-        "Finish in the Chrome Web Store tab: <b>Add to Chrome</b>, then <b>Add extension</b>. This card notices on its own.";
-      buttons([{ label: "Open in a window instead", fn: function () { window_(false); } }, { label: "Cancel", fn: close }]);
+      title.innerHTML = "Installing <em>Instagram</em>";
+      body.innerHTML = '<div class="sp-wait"><span class="sp-ring"></span>Waiting for your browser\u2026</div>' +
+        "Press <b>Add to Chrome</b> in the tab that opened, then <b>Add extension</b> when it asks. This card notices on its own.";
+      buttons([
+        { label: "I've installed it", cls: "gold", fn: reloadInto },
+        { label: "Open in a window instead", fn: function () { window_(false); } }
+      ]);
       until = Date.now() + 300000;
       clearInterval(timer);
       timer = setInterval(function () {
@@ -259,24 +273,39 @@ window.TD = window.TD || {};
       }, 1500);
     }
     function start() {
-      title.innerHTML = "Instagram is <em>getting ready</em>";
-      body.innerHTML = "Instagram doesn't let other websites show it, so TDPlay OS docks the real Instagram in Chrome's own side panel \u2014 through a small TDPlay OS add-on. Once, about twenty seconds:" +
-        '<ol class="sp-steps"><li>Press <b>Add to Chrome</b> \u2014 the Chrome Web Store opens in a new tab.</li>' +
-        "<li>Chrome asks you to confirm: press <b>Add extension</b>.</li>" +
-        "<li>Come back here \u2014 this card turns into <b>Instagram is ready</b>.</li></ol>" +
+      var store = spStore();
+      title.innerHTML = "Install Instagram <em>to continue</em>";
+      body.innerHTML = "Instagram doesn't let other websites show it. The TDPlay OS panel puts the real thing in your browser's side panel, beside the OS \u2014 once, about twenty seconds." +
+        (store
+          ? '<ol class="sp-steps"><li>Press <b>Install Now</b> \u2014 the Chrome Web Store opens in a new tab.</li>' +
+            "<li><b>Add to Chrome</b>, then <b>Add extension</b> when Chrome asks \u2014 it always asks.</li>" +
+            "<li>Come back here: Instagram opens by itself.</li></ol>"
+          : '<ol class="sp-steps"><li>Press <b>Install Now</b> \u2014 the panel\u2019s folder opens on GitHub. <b>Code \u2192 Download ZIP</b>, then unzip it.</li>' +
+            "<li>Open <b>chrome://extensions</b>, turn on <b>Developer mode</b>, press <b>Load unpacked</b> and choose the <b>chrome-sidepanel</b> folder.</li>" +
+            "<li>Come back here: Instagram opens by itself.</li></ol>") +
         "It touches nothing but Instagram and TDPlay OS, and collects nothing.";
       buttons([
-        { label: "Add to Chrome", cls: "gold", fn: function () { window.open(spStore(), "_blank", "noopener"); waiting(); } },
+        { label: "Install Now", cls: "gold", fn: function () { window.open(store || HELP, "_blank", "noopener"); waiting(); } },
         { label: "Open in a window", fn: function () { window_(true); } }
       ]);
     }
     ov.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
     (document.getElementById("desktop") || document.body).appendChild(ov);
     spCard = ov; ov.close = close;
-    start();
-    TD.sidePanelDetect(function (found) { if (found && spCard) ready(); });   // already installed? skip ahead
+    if (installed) ready(); else start();
+    if (!installed) TD.sidePanelDetect(function (found) { if (found && spCard) ready(); });   // already there? skip ahead
     return ov;
   };
+
+  // Coming back from an install: the page has the panel's bridge now, so finish what was asked for.
+  function afterInstall() {
+    var p = TD.store.get("spOpen", null);
+    if (p == null) return;
+    TD.store.del("spOpen");
+    setTimeout(function () { TD.sidePanelSetup(p, bridged()); }, 500);   // one press opens it: the browser wants a click
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", afterInstall);
+  else setTimeout(afterInstall, 0);
 
   var noPanelOnce = false;
   TD.phoneWindowDirect = function (url, name) { noPanelOnce = true; return TD.phoneWindow(url, name); };
