@@ -144,3 +144,10 @@ f.addEventListener("load", function () {
     setTimeout(function () { fix.hidden = true; }, 12000);
   }, 6000);
 });
+
+// TDPlay OS running inside this panel (the TDPlay OS button) asking to switch back to Instagram.
+window.addEventListener("message", function (e) {
+  if (!e.data || typeof e.data.tdplayInstagram !== "string") return;
+  if (!/^https:\/\/mircix\.github\.io$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(e.origin)) return;
+  openPath(e.data.tdplayInstagram);
+});

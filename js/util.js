@@ -174,11 +174,21 @@ window.TD = window.TD || {};
   // The extension marks TDPlay OS's own pages (bridge.js), which beats knowing its id: the unpacked build,
   // the Web Store one and anything in between all mark the page the same way.
   function bridged() { try { return document.documentElement.hasAttribute("data-tdplay-panel"); } catch (e) { return false; } }
-  TD.sidePanel = bridged();                                   // true once the extension is there
+  // TDPlay OS can be running *in* the panel (its own TDPlay OS button). The panel is then the frame above
+  // this one, so it is asked directly \u2014 from in there the extension can't be reached any other way.
+  function panelParent() {
+    try {
+      var a = location.ancestorOrigins;
+      if (a && a.length && /^chrome-extension:/.test(a[a.length - 1])) return a[a.length - 1];
+    } catch (e) { }
+    var m = /^(chrome-extension:\/\/[a-p]+)\//.exec(document.referrer || "");
+    return m ? m[1] : null;
+  }
+  TD.sidePanel = bridged() || !!panelParent();                // true once the extension is there
 
   // Ask every candidate id whether the extension is installed. Cheap, and the only way to notice an install.
   TD.sidePanelDetect = function (cb) {
-    if (bridged()) { TD.sidePanel = true; if (cb) cb(true); return; }
+    if (bridged() || panelParent()) { TD.sidePanel = true; if (cb) cb(true); return; }
     if (!canTalk()) { if (cb) cb(false); return; }
     var ids = spIds(), left = ids.length, found = false;
     ids.forEach(function (id) {
@@ -201,6 +211,8 @@ window.TD = window.TD || {};
 
   TD.openSidePanel = function (path) {                        // "" | "reels/" | "mitch_tdp/" | "p/<id>/"
     path = path || "";
+    var parentPanel = panelParent();                          // already in the panel: just tell it where to go
+    if (parentPanel) { try { parent.postMessage({ tdplayInstagram: path }, parentPanel); return true; } catch (e) { } }
     // The bridge is listening in this very click, which is the only moment Chrome will open a side panel.
     if (bridged()) {
       var root = document.documentElement;
