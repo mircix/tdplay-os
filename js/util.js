@@ -127,13 +127,33 @@ window.TD = window.TD || {};
 
   // A phone-shaped popup window (real site, no toolbar) — used for Instagram, which refuses to load inside other pages.
   TD.phoneWindow = function (url, name) {
-    var w = 420, h = Math.min(820, (screen.availHeight || 900) - 60);
-    var left = Math.round((window.screenX || 0) + ((window.outerWidth || screen.width) - w) / 2);
-    var top = Math.round((window.screenY || 0) + Math.max(0, ((window.outerHeight || screen.height) - h) / 2));
-    var win = window.open(url, name || "tdos-phone", "popup=yes,width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",resizable=yes,scrollbars=yes");
-    if (!win) TD.notify("Pop-up blocked", "Allow pop-ups for TDPlay OS to open this in a phone window.", { ms: 4000 });
-    else try { win.focus(); } catch (e) { }
-    return win;
+    function open() {
+      var w = 420, h = Math.min(820, (screen.availHeight || 900) - 60);
+      var left = Math.round((window.screenX || 0) + ((window.outerWidth || screen.width) - w) / 2);
+      var top = Math.round((window.screenY || 0) + Math.max(0, ((window.outerHeight || screen.height) - h) / 2));
+      var win = window.open(url, name || "tdos-phone", "popup=yes,width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",resizable=yes,scrollbars=yes");
+      if (!win) { TD.notify("Pop-up blocked", "Allow pop-ups for TDPlay OS to open this in a phone window.", { ms: 4000 }); return win; }
+      try { win.focus(); } catch (e) { }
+      // a window opened from a full-screen page can come up filling the screen — put it back to phone size
+      setTimeout(function () {
+        try {
+          if (win.closed) return;
+          if (win.outerWidth > w + 80 || win.outerHeight > h + 120) { win.resizeTo(w, h); win.moveTo(left, top); }
+        } catch (e) { }
+      }, 400);
+      return win;
+    }
+    // Leave the page's full screen first: a pop-up opened from a full-screen page inherits it and takes
+    // over the whole display instead of being a phone-sized window beside the OS.
+    var fs = document.fullscreenElement || document.webkitFullscreenElement;
+    if (fs) {
+      var p;
+      try { p = (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { }
+      if (p && p.then) { p.then(open, open); return { deferred: true }; }
+      setTimeout(open, 60);
+      return { deferred: true };
+    }
+    return open();
   };
 
   // ---------------------------------------------------------------- store / bus
