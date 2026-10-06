@@ -9,6 +9,6 @@ window.TD_CONFIG = {
   /* Instagram in Chrome's side panel (chrome-sidepanel/). The unpacked build's id is built in; add the
    * Web Store id here once the listing is live, and paste the listing URL below — that URL is what turns
    * on the "Instagram is getting ready" card for visitors who don't have it yet. Empty = pop-up window. */
-  sidePanelIds: [],
+  sidePanelIds: ["hkacdfhmaojpanffljaecpclcdaghaja"],   // the Chrome Web Store build (draft 2026-10-06)
   sidePanelStoreUrl: ""   // e.g. https://chromewebstore.google.com/detail/tdplay-os-instagram-side-panel/<id>
 };
