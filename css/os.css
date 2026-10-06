@@ -205,6 +205,13 @@ kbd{font:12px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(
 .dialog-check{display:flex;gap:8px;align-items:center;justify-content:center;color:var(--muted);font-size:13px;margin-top:14px}
 .dialog-btns{display:flex;gap:10px;justify-content:center;margin-top:18px}
 .dialog-btns .btn{padding:9px 18px;font-size:14.5px}
+/* the one-time "Instagram is getting ready" card */
+.sp-steps{text-align:left;margin:12px 0 10px;padding-left:22px;line-height:1.55}
+.sp-steps li{margin:5px 0}
+.sp-steps b{color:var(--text)}
+.sp-wait{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--text);font-size:15px;margin:4px 0 10px}
+.sp-ring{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.22);border-top-color:var(--gold);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .toasts{position:absolute;right:14px;top:calc(var(--topbar) + 10px);z-index:95;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{pointer-events:auto;display:flex;gap:10px;align-items:center;min-width:260px;max-width:360px;padding:10px 12px;border-radius:12px;background:rgba(18,18,26,.96);border:1px solid var(--line2);box-shadow:0 14px 40px rgba(0,0,0,.5);animation:toastin .25s ease}
 .toast.out{animation:winout .2s ease forwards}

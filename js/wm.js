@@ -204,6 +204,7 @@
   TD.menu = function (x, y, items, above) {
     TD.clear(menuEl);
     items.forEach(function (it) {
+      if (!it) return;                                  // a conditional entry that doesn't apply
       if (it === "-") { menuEl.appendChild(TD.h("hr")); return; }
       if (it.head) { menuEl.appendChild(TD.h("div", { "class": "mh", text: it.head })); return; }
       var b = TD.h("button", { html: (it.icon ? '<span class="mi" style="width:16px;height:16px;display:inline-flex">' + it.icon + "</span>" : "") + TD.esc(it.label) + (it.k ? '<span class="k">' + TD.esc(it.k) + "</span>" : "") });

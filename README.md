@@ -81,10 +81,17 @@ see [`worker/README.md`](worker/README.md) for the one-time setup, then put the 
 
 ## Instagram beside the browser (Chrome)
 
-`chrome-sidepanel/` is an unpacked Chrome extension that docks the real Instagram (and TDPlay OS) in
-Chrome's side panel — see [`chrome-sidepanel/README.md`](chrome-sidepanel/README.md) to install it. Once it's
+`chrome-sidepanel/` is a Chrome extension that docks the real Instagram (and TDPlay OS) in Chrome's side
+panel — see [`chrome-sidepanel/README.md`](chrome-sidepanel/README.md) to install it unpacked, and
+[`chrome-sidepanel/STORE.md`](chrome-sidepanel/STORE.md) to publish it to the Chrome Web Store. Once it's
 installed, clicking Instagram in TDPlay OS opens the side panel instead of a pop-up window (`js/util.js` →
 `TD.phoneWindow` asks the extension; without it nothing changes).
+
+With a published listing in `js/config.js` (`sidePanelIds`, `sidePanelStoreUrl`), the first Instagram click
+in Chrome shows the one-time **“Instagram is getting ready”** card instead: *Add to Chrome*, Chrome's own
+confirmation, and the card notices the install by itself (`TD.sidePanelSetup`). No website can install an
+extension without that confirmation, so the card walks the visitor through it. Build the upload and the
+store artwork with `tools/pack_extension.py` and `tools/store_shot.py`.
 
 ## Run locally
 

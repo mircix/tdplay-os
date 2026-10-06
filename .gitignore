@@ -1,2 +1,8 @@
 .DS_Store
 __pycache__/
+
+# Chrome writes this when the extension is loaded unpacked
+chrome-sidepanel/_metadata/
+
+# built extension zips
+dist/

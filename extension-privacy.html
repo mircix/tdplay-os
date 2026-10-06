@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy — TDPlay OS Instagram side panel</title>
+<link rel="icon" href="assets/logo.png">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 48px 20px 80px; background: #07070c; color: #e9e9f0;
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 6px; }
+  h2 { font-size: 18px; margin: 34px 0 8px; }
+  .date { color: #9a9aa8; font-size: 14px; margin-bottom: 28px; }
+  p, li { color: #c8c8d4; }
+  b { color: #fff; }
+  a { color: #ffd166; }
+  ul { padding-left: 22px; }
+  .card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 16px 18px; margin: 22px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>TDPlay OS — Instagram side panel</h1>
+  <div class="date">Privacy policy · last updated 6 October 2026</div>
+
+  <div class="card"><b>The extension collects nothing.</b> It stores no personal data, sends nothing to
+  any server of ours, and has no analytics. There is no account and nothing to opt out of.</div>
+
+  <h2>What it does</h2>
+  <p>The extension shows <b>instagram.com</b> — and, on request, <b>TDPlay OS</b> — inside Chrome's side
+  panel. Instagram sends headers that stop other pages from displaying it; inside its own panel the
+  extension removes those headers so the page renders. That rule is limited to frames that belong to no
+  browser tab, which is what a side panel is, so Instagram keeps its protection on every website you visit.</p>
+
+  <h2>What it stores</h2>
+  <ul>
+    <li><b>Chrome session storage</b>, cleared when Chrome closes: which Instagram page the panel should
+      show, when you click Instagram in TDPlay OS. Nothing else, and it never leaves your browser.</li>
+    <li>You are signed in to Instagram as yourself, through Chrome's own cookies for instagram.com. The
+      extension does not read, copy or transmit them.</li>
+  </ul>
+
+  <h2>Who it talks to</h2>
+  <p>Only instagram.com (the page in the panel) and tdplay.site / mircix.github.io (TDPlay OS, when you
+  put it in the panel). TDPlay OS may ask the extension two things: whether it is installed, and to open
+  the panel on an Instagram page. No other site can talk to it.</p>
+
+  <h2>Permissions, and why</h2>
+  <ul>
+    <li><b>Side panel</b> — the panel is the whole point.</li>
+    <li><b>Access to instagram.com</b> — to show it in the panel and drop the framing headers there.</li>
+    <li><b>Access to mircix.github.io</b> — so TDPlay OS can ask the panel to open.</li>
+    <li><b>Storage</b> — the one session value above.</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>Questions or a removal request: <a href="https://github.com/mircix/tdplay-os/issues">github.com/mircix/tdplay-os/issues</a>.
+  Source code: <a href="https://github.com/mircix/tdplay-os/tree/main/chrome-sidepanel">chrome-sidepanel/</a>.</p>
+</main>
+</body>
+</html>

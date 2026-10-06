@@ -5,6 +5,15 @@
   var TDPLAY_IG = "https://www.instagram.com/mitch_tdp/", OWNER = "mitch_tdp", IG = "https://www.instagram.com/";
   var PHONE = "ig-phone";                                            // one named phone window for all of real Instagram
   function phone(path) { return TD.phoneWindow(IG + (path || ""), PHONE); }
+  // what opening the real Instagram does here: Chrome's side panel, the one-time setup card, or a pop-up window
+  function note() {
+    var st = { "class": "dim", style: "font-size:12.5px;margin-top:16px" };
+    if (TD.sidePanel) return TD.h("div", st, ["Instagram opens in Chrome's side panel, beside TDPlay OS \u2014 the dock icon and every link here land there."]);
+    if (TD.sidePanelInstallable()) return TD.h("div", st, ["Instagram opens in a window beside TDPlay OS. In Chrome it can dock in the side panel instead, the way Gemini does: ",
+      TD.h("a", { href: "#", onclick: function (e) { e.preventDefault(); TD.sidePanelSetup(""); }, text: "set that up" }), " \u2014 one time, about twenty seconds."]);
+    return TD.h("div", st, ["The Instagram icon in the dock opens this window directly. If nothing opens, your browser blocked the pop-up \u2014 allow pop-ups for TDPlay OS. On phones it opens as a new tab."]);
+  }
+  function canOfferPanel() { return !TD.sidePanel && !!(window.TD_CONFIG && TD_CONFIG.sidePanelStoreUrl) && !!(window.chrome && chrome.runtime && chrome.runtime.sendMessage) && !TD.isMobile(); }
   function igSearchUrl(q) { return IG + "explore/search/keyword/?q=" + encodeURIComponent(q); }
   function handle(url) { try { return (new URL(url).pathname.split("/").filter(Boolean)[0] || "").toLowerCase(); } catch (e) { return ""; } }
   function embedUrl(url) {
@@ -48,7 +57,9 @@
     menu: function () { return ["-",
       { label: "TDPlay's profile & artists (in TDPlay OS)", icon: TD.icons.instagram, fn: function () { TD.open("instagram", { noAuto: true, tab: "tdplay" }); } },
       { label: "Reels", fn: function () { phone("reels/"); } }, { label: "Explore", fn: function () { phone("explore/"); } },
-      { label: "Messages", fn: function () { phone("direct/inbox/"); } }, { label: "Notifications", fn: function () { phone("notifications/"); } }]; },
+      { label: "Messages", fn: function () { phone("direct/inbox/"); } }, { label: "Notifications", fn: function () { phone("notifications/"); } },
+      canOfferPanel() ? "-" : null,
+      canOfferPanel() ? { label: "Dock Instagram in Chrome's side panel\u2026", icon: TD.icons.instagram, fn: function () { TD.store.del("sidePanelNo"); TD.sidePanelSetup(""); } } : null]; },
     mount: function (win, params) {
       var C = TD.catalog, IG = TD.ig;
       var state = { tab: (params && params.tab) || "home", q: "", post: "", profile: null };   // profile: {user, name, artist}
@@ -207,10 +218,7 @@
         var g = TD.h("div", { "class": "folders", style: "grid-template-columns:repeat(auto-fill,minmax(170px,1fr))" });
         shortcuts.forEach(function (sc) { g.appendChild(TD.h("div", { "class": "folder", onclick: function () { phone(sc[1]); } }, [TD.h("div", { "class": "fn", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", html: sc[2].replace("<svg", '<svg style="width:20px;height:20px;vertical-align:-4px;margin-right:8px"') + TD.esc(sc[0]) }), TD.h("div", { "class": "fc", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", text: "instagram.com/" + sc[1] })])); });
         box.appendChild(g);
-        box.appendChild(TD.sidePanel
-          ? TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:16px", text: "Instagram opens in Chrome's side panel, beside TDPlay OS (the TDPlay OS extension). The Instagram icon in the dock opens it directly." })
-          : TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:16px" }, ["The Instagram icon in the dock opens this window directly. If nothing opens, your browser blocked the pop-up — allow pop-ups for TDPlay OS. On phones it opens as a new tab. In Chrome on a computer, the ",
-            TD.h("a", { href: "https://github.com/mircix/tdplay-os/tree/main/chrome-sidepanel", target: "_blank", rel: "noopener", text: "TDPlay OS extension" }), " docks Instagram in the side panel instead."]));
+        box.appendChild(note());
         main.appendChild(box);
       }
       function loading(msg) { return TD.h("div", { "class": "empty", text: msg || "Loading…" }); }

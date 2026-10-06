@@ -8,7 +8,24 @@ Instagram refuses to be shown inside another page (`X-Frame-Options: DENY`), whi
 override. An extension can: this one removes that header **only for its own panel** — frames that belong
 to no browser tab — so instagram.com stays unframeable on every website you visit.
 
-## Install (one minute, no Web Store)
+## Install
+
+Two routes. The Web Store one is what visitors get; the unpacked one is for developing.
+
+### From the Chrome Web Store (visitors)
+
+Not published yet. [`STORE.md`](STORE.md) has the whole submission — listing copy, permission
+justifications, privacy answers — and the build command:
+
+```bash
+python3 tools/pack_extension.py            # → dist/tdplay-os-sidepanel-<version>.zip
+```
+
+Once it's live, put the store id and URL into [`../js/config.js`](../js/config.js). That turns on the
+**“Instagram is getting ready”** card: the first time someone on Chrome clicks Instagram in TDPlay OS they
+get *Add to Chrome* → Chrome's own confirmation → the card notices the install and opens the panel.
+
+### Unpacked (one minute, no Web Store)
 
 1. Chrome → `chrome://extensions`
 2. Turn on **Developer mode** (top right)

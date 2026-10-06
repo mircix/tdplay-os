@@ -153,26 +153,134 @@ window.TD = window.TD || {};
     if (!document.fullscreenElement) setTimeout(raisePhone, 250);      // bring Instagram back to the front
   });
 
-  // With the TDPlay OS Chrome extension installed (chrome-sidepanel/), real Instagram docks in Chrome's side panel
-  // beside the OS instead of a pop-up. The extension's id is fixed by the "key" in its manifest.
-  var SIDEPANEL = "dpaaikokdleaploelohifmeggbpaddcc";
-  TD.sidePanel = false;                                       // true once the extension answers
-  try {
-    chrome.runtime.sendMessage(SIDEPANEL, { ping: 1 }, function (r) { if (!chrome.runtime.lastError) TD.sidePanel = !!(r && r.ok); });
-  } catch (e) { }                                             // not Chrome, or no extension talks to this page
-  function toSidePanel(url) {
-    var m = /^https:\/\/(?:www\.)?instagram\.com\/(.*)$/.exec(url || "");
-    if (!TD.sidePanel || !m) return false;
+  // ---------------------------------------------- Instagram in Chrome's side panel (chrome-sidepanel/)
+  // instagram.com refuses to be framed, which no website can override, so the real site can only live in a
+  // pop-up window — or, with the small TDPlay OS extension, docked in Chrome's side panel beside the OS.
+  // The extension answers { ping } and opens a path on { instagram }. Its id is fixed by the manifest "key";
+  // the Web Store build has its own id, so TD_CONFIG.sidePanelIds can list both.
+  var IGURL = "https://www.instagram.com/";
+  var SP_DEV = "dpaaikokdleaploelohifmeggbpaddcc";            // the unpacked build in chrome-sidepanel/
+  function spIds() {
+    var c = (window.TD_CONFIG && TD_CONFIG.sidePanelIds) || [];
+    return c.concat(c.indexOf(SP_DEV) > -1 ? [] : [SP_DEV]);
+  }
+  function spStore() { return (window.TD_CONFIG && TD_CONFIG.sidePanelStoreUrl) || ""; }
+  function canTalk() { return !!(window.chrome && chrome.runtime && chrome.runtime.sendMessage); }
+  function spSend(id, msg, cb) {
+    try { chrome.runtime.sendMessage(id, msg, function (r) { cb(chrome.runtime.lastError ? null : r); }); }
+    catch (e) { cb(null); }                                   // not Chrome, or no extension talks to this page
+  }
+  var spId = null;                                            // the id that answered
+  TD.sidePanel = false;                                       // true once the extension is there
+
+  // Ask every candidate id whether the extension is installed. Cheap, and the only way to notice an install.
+  TD.sidePanelDetect = function (cb) {
+    if (!canTalk()) { if (cb) cb(false); return; }
+    var ids = spIds(), left = ids.length, found = false;
+    ids.forEach(function (id) {
+      spSend(id, { ping: 1 }, function (r) {
+        if (r && r.ok && !found) {
+          found = true; spId = id;
+          if (!TD.sidePanel) { TD.sidePanel = true; if (TD.bus) TD.bus.emit("sidepanel", true); }
+        }
+        if (!--left && cb) cb(found);
+      });
+    });
+  };
+  if (canTalk()) TD.sidePanelDetect();
+
+  // Worth offering the one-time install? Chrome on a computer, not installed yet, listing live, not refused.
+  TD.sidePanelInstallable = function () {
+    return !!(spStore() && canTalk() && !TD.sidePanel && !TD.isMobile() && !TD.store.get("sidePanelNo", false));
+  };
+
+  TD.openSidePanel = function (path) {                        // "" | "reels/" | "mitch_tdp/" | "p/<id>/"
+    if (!TD.sidePanel || !spId) return false;
     // Chrome hides the side panel while the page is full screen
     if (document.fullscreenElement || document.webkitFullscreenElement) try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { }
-    chrome.runtime.sendMessage(SIDEPANEL, { instagram: m[1] }, function (r) {
-      if (chrome.runtime.lastError || !r || !r.ok) TD.notify("Instagram side panel", "Chrome didn't open it — click the TDPlay OS extension's button in the toolbar.", { icon: TD.icons.instagram, ms: 5000 });
+    spSend(spId, { instagram: path || "" }, function (r) {
+      if (!r || !r.ok) TD.notify("Instagram side panel", "Chrome didn't open it — click the TDPlay OS button in the toolbar.", { icon: TD.icons.instagram, ms: 5000 });
     });
     return true;
+  };
+
+  // "Instagram is getting ready": the one-time install card. Chrome only installs an extension after the
+  // visitor presses Add to Chrome in the Web Store and confirms — no website can do it for them — so the
+  // card walks them through it and notices by itself when it lands.
+  var spCard = null;
+  TD.sidePanelSetup = function (path) {
+    if (spCard) return spCard;
+    path = path || "";
+    var icon = TD.h("div", { "class": "dialog-icon", html: TD.icons.instagram });
+    var title = TD.h("div", { "class": "dialog-title" });
+    var body = TD.h("div", { "class": "dialog-body" });
+    var btns = TD.h("div", { "class": "dialog-btns" });
+    var box = TD.h("div", { "class": "dialog glass" }, [icon, title, body, btns]);
+    var ov = TD.h("div", { "class": "dialog-ov" }, [box]);
+    var timer = null, until = 0;
+    function close() { clearInterval(timer); spCard = null; ov.classList.add("out"); setTimeout(function () { ov.remove(); }, 180); }
+    function buttons(list) {
+      TD.clear(btns);
+      list.forEach(function (b) { if (b) btns.appendChild(TD.h("button", { "class": "btn" + (b.cls ? " " + b.cls : ""), text: b.label, onclick: b.fn })); });
+      var first = btns.querySelector(".btn.gold") || btns.querySelector(".btn"); if (first) first.focus();
+    }
+    function window_(decline) {
+      if (decline) TD.store.set("sidePanelNo", true);          // don't offer again; the app's menu still can
+      close(); TD.phoneWindowDirect(IGURL + path, "ig-phone");
+    }
+    function ready() {
+      clearInterval(timer);
+      title.innerHTML = "Instagram is <em>ready</em>";
+      body.innerHTML = "The panel is installed. From here on Instagram opens in Chrome's side panel beside TDPlay OS \u2014 the dock icon, Reels, Explore and DMs all land there.";
+      buttons([{ label: "Open Instagram", cls: "gold", fn: function () { close(); TD.openSidePanel(path); } }]);
+    }
+    function waiting() {
+      title.innerHTML = "Instagram is <em>getting ready</em>";
+      body.innerHTML = '<div class="sp-wait"><span class="sp-ring"></span>Waiting for Chrome\u2026</div>' +
+        "Finish in the Chrome Web Store tab: <b>Add to Chrome</b>, then <b>Add extension</b>. This card notices on its own.";
+      buttons([{ label: "Open in a window instead", fn: function () { window_(false); } }, { label: "Cancel", fn: close }]);
+      until = Date.now() + 300000;
+      clearInterval(timer);
+      timer = setInterval(function () {
+        if (Date.now() > until) { clearInterval(timer); return; }
+        TD.sidePanelDetect(function (found) { if (found && spCard) ready(); });
+      }, 1500);
+    }
+    function start() {
+      title.innerHTML = "Instagram is <em>getting ready</em>";
+      body.innerHTML = "Instagram doesn't let other websites show it, so TDPlay OS docks the real Instagram in Chrome's own side panel \u2014 through a small TDPlay OS add-on. Once, about twenty seconds:" +
+        '<ol class="sp-steps"><li>Press <b>Add to Chrome</b> \u2014 the Chrome Web Store opens in a new tab.</li>' +
+        "<li>Chrome asks you to confirm: press <b>Add extension</b>.</li>" +
+        "<li>Come back here \u2014 this card turns into <b>Instagram is ready</b>.</li></ol>" +
+        "It touches nothing but Instagram and TDPlay OS, and collects nothing.";
+      buttons([
+        { label: "Add to Chrome", cls: "gold", fn: function () { window.open(spStore(), "_blank", "noopener"); waiting(); } },
+        { label: "Open in a window", fn: function () { window_(true); } }
+      ]);
+    }
+    ov.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    (document.getElementById("desktop") || document.body).appendChild(ov);
+    spCard = ov; ov.close = close;
+    start();
+    TD.sidePanelDetect(function (found) { if (found && spCard) ready(); });   // already installed? skip ahead
+    return ov;
+  };
+
+  var noPanelOnce = false;
+  TD.phoneWindowDirect = function (url, name) { noPanelOnce = true; return TD.phoneWindow(url, name); };
+  // false → open the usual pop-up window; otherwise the panel took it (or the setup card did)
+  function toSidePanel(url) {
+    var m = /^https:\/\/(?:www\.)?instagram\.com\/(.*)$/.exec(url || "");
+    if (!m) return false;
+    if (noPanelOnce) { noPanelOnce = false; return false; }
+    if (TD.sidePanel) return TD.openSidePanel(m[1]) && "panel";
+    if (TD.sidePanelInstallable()) { TD.sidePanelSetup(m[1]); return "setup"; }
+    return false;
   }
 
   TD.phoneWindow = function (url, name) {
-    if (toSidePanel(url)) return { sidePanel: true };
+    var took = toSidePanel(url);
+    if (took) return took === "setup" ? { setup: true } : { sidePanel: true };
     function open() {
       var w = 420, h = Math.min(820, (screen.availHeight || 900) - 60);
       var left = Math.round((window.screenX || 0) + ((window.outerWidth || screen.width) - w) / 2);
