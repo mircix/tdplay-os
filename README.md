@@ -79,6 +79,13 @@ The Instagram app is powered by a small Cloudflare Worker that holds the owner's
 see [`worker/README.md`](worker/README.md) for the one-time setup, then put the worker URL in
 `js/config.js` → `igApi`.
 
+## Instagram beside the browser (Chrome)
+
+`chrome-sidepanel/` is an unpacked Chrome extension that docks the real Instagram (and TDPlay OS) in
+Chrome's side panel — see [`chrome-sidepanel/README.md`](chrome-sidepanel/README.md) to install it. Once it's
+installed, clicking Instagram in TDPlay OS opens the side panel instead of a pop-up window (`js/util.js` →
+`TD.phoneWindow` asks the extension; without it nothing changes).
+
 ## Run locally
 
 ```bash

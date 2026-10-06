@@ -1,30 +1,16 @@
-/* TDPlay OS — Instagram side panel.
-   The header rule that lets instagram.com render in a frame is OFF by default and only switched on
-   while the panel is actually open, so Instagram keeps its normal protection everywhere else. */
+/* TDPlay OS — Instagram side panel: the toolbar button opens the panel, and so does Instagram in TDPlay OS.
+   The framing rule lives in panel.js. */
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(function () { });
 
-function ruleset(on) {
-  return chrome.declarativeNetRequest.updateEnabledRulesets(
-    on ? { enableRulesetIds: ["frameable"] } : { disableRulesetIds: ["frameable"] }
-  ).catch(function () { });
-}
-// the panel opens a port when it loads and the port drops when the panel closes
-chrome.runtime.onConnect.addListener(function (port) {
-  if (port.name !== "panel") return;
-  ruleset(true).then(function () { try { port.postMessage({ ready: true }); } catch (e) { } });
-  port.onDisconnect.addListener(function () { ruleset(false); });
-});
-chrome.runtime.onStartup.addListener(function () { ruleset(false); });
-
-chrome.runtime.onInstalled.addListener(function () {
-  ruleset(false);
-  chrome.scripting.registerContentScripts([{
-    id: "ig-unframe",
-    matches: ["https://*.instagram.com/*"],
-    allFrames: true,
-    matchOriginAsFallback: true,
-    runAt: "document_start",
-    world: "MAIN",
-    js: ["unframe.js"]
-  }]).catch(function () { });
+// TDPlay OS (see externally_connectable) asks: { ping } "are you there?", { instagram: "reels/" } "show this".
+chrome.runtime.onMessageExternal.addListener(function (msg, sender, reply) {
+  if (!msg) return;
+  if (msg.ping) { reply({ ok: true }); return; }
+  if (typeof msg.instagram !== "string") return;
+  var windowId = sender.tab ? sender.tab.windowId : null;   // no tab: TDPlay OS inside the panel itself, already open
+  // first thing: Chrome only allows opening the panel while the click in TDPlay OS still counts
+  var opened = windowId == null ? Promise.resolve() : chrome.sidePanel.open({ windowId: windowId });
+  chrome.storage.session.set({ go: { path: msg.instagram, windowId: windowId, at: Date.now() } });   // the panel picks it up
+  opened.then(function () { reply({ ok: true }); }, function (e) { reply({ ok: false, error: e.message }); });
+  return true;                                               // reply comes later
 });
