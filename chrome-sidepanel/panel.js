@@ -21,14 +21,31 @@ var ready = chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [FR
 function go(url, btn) {
   ready.then(function () { f.src = url; });
   [].forEach.call(document.querySelectorAll(".bar button[data-go]"), function (b) { b.classList.toggle("on", b === btn); });
+  document.getElementById("tdplay").classList.toggle("on", url === OS);
+}
+// an Instagram path ("", "reels/", "mitch_tdp/", "p/<id>/") — never anywhere but instagram.com
+function openPath(path) {
+  var u; try { u = new URL(path || "", IG); } catch (e) { return; }
+  if (u.origin !== new URL(IG).origin) return;
+  var btn = [].filter.call(document.querySelectorAll(".bar button[data-go]"), function (b) { return IG + b.dataset.go === u.href; })[0] || null;
+  go(u.href, btn);
 }
 [].forEach.call(document.querySelectorAll("button[data-go]"), function (b) {
   b.addEventListener("click", function () { go(IG + b.dataset.go, b); });
 });
 document.getElementById("reload").addEventListener("click", function () { f.src = f.src; });
 document.getElementById("tdplay").addEventListener("click", function () {
-  var on = f.src.indexOf("tdplay-os") > -1;
-  go(on ? IG : OS, null);
-  this.classList.toggle("on", !on);
+  go(f.src.indexOf("tdplay-os") > -1 ? IG : OS, null);
 });
-go(IG, document.querySelector(".bar button[data-go='']"));
+
+// Instagram clicked in TDPlay OS (sw.js stores the request): a fresh one on opening, or any while open
+var win = chrome.windows.getCurrent().then(function (w) { return w.id; }, function () { return null; });
+function forMe(g, wid) { return g && (g.windowId == null || wid == null || g.windowId === wid); }
+Promise.all([win, chrome.storage.session.get("go")]).then(function (r) {
+  var g = r[1].go;
+  if (forMe(g, r[0]) && Date.now() - g.at < 10000) openPath(g.path); else openPath("");
+});
+chrome.storage.onChanged.addListener(function (ch, area) {
+  if (area !== "session" || !ch.go || !ch.go.newValue) return;
+  win.then(function (wid) { if (forMe(ch.go.newValue, wid)) openPath(ch.go.newValue.path); });
+});

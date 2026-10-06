@@ -153,7 +153,26 @@ window.TD = window.TD || {};
     if (!document.fullscreenElement) setTimeout(raisePhone, 250);      // bring Instagram back to the front
   });
 
+  // With the TDPlay OS Chrome extension installed (chrome-sidepanel/), real Instagram docks in Chrome's side panel
+  // beside the OS instead of a pop-up. The extension's id is fixed by the "key" in its manifest.
+  var SIDEPANEL = "dpaaikokdleaploelohifmeggbpaddcc";
+  TD.sidePanel = false;                                       // true once the extension answers
+  try {
+    chrome.runtime.sendMessage(SIDEPANEL, { ping: 1 }, function (r) { if (!chrome.runtime.lastError) TD.sidePanel = !!(r && r.ok); });
+  } catch (e) { }                                             // not Chrome, or no extension talks to this page
+  function toSidePanel(url) {
+    var m = /^https:\/\/(?:www\.)?instagram\.com\/(.*)$/.exec(url || "");
+    if (!TD.sidePanel || !m) return false;
+    // Chrome hides the side panel while the page is full screen
+    if (document.fullscreenElement || document.webkitFullscreenElement) try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { }
+    chrome.runtime.sendMessage(SIDEPANEL, { instagram: m[1] }, function (r) {
+      if (chrome.runtime.lastError || !r || !r.ok) TD.notify("Instagram side panel", "Chrome didn't open it — click the TDPlay OS extension's button in the toolbar.", { icon: TD.icons.instagram, ms: 5000 });
+    });
+    return true;
+  }
+
   TD.phoneWindow = function (url, name) {
+    if (toSidePanel(url)) return { sidePanel: true };
     function open() {
       var w = 420, h = Math.min(820, (screen.availHeight || 900) - 60);
       var left = Math.round((window.screenX || 0) + ((window.outerWidth || screen.width) - w) / 2);

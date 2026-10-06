@@ -207,7 +207,10 @@
         var g = TD.h("div", { "class": "folders", style: "grid-template-columns:repeat(auto-fill,minmax(170px,1fr))" });
         shortcuts.forEach(function (sc) { g.appendChild(TD.h("div", { "class": "folder", onclick: function () { phone(sc[1]); } }, [TD.h("div", { "class": "fn", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", html: sc[2].replace("<svg", '<svg style="width:20px;height:20px;vertical-align:-4px;margin-right:8px"') + TD.esc(sc[0]) }), TD.h("div", { "class": "fc", style: "white-space:nowrap;overflow:hidden;text-overflow:ellipsis", text: "instagram.com/" + sc[1] })])); });
         box.appendChild(g);
-        box.appendChild(TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:16px", text: "The Instagram icon in the dock opens this window directly. If nothing opens, your browser blocked the pop-up — allow pop-ups for TDPlay OS. On phones it opens as a new tab." }));
+        box.appendChild(TD.sidePanel
+          ? TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:16px", text: "Instagram opens in Chrome's side panel, beside TDPlay OS (the TDPlay OS extension). The Instagram icon in the dock opens it directly." })
+          : TD.h("div", { "class": "dim", style: "font-size:12.5px;margin-top:16px" }, ["The Instagram icon in the dock opens this window directly. If nothing opens, your browser blocked the pop-up — allow pop-ups for TDPlay OS. On phones it opens as a new tab. In Chrome on a computer, the ",
+            TD.h("a", { href: "https://github.com/mircix/tdplay-os/tree/main/chrome-sidepanel", target: "_blank", rel: "noopener", text: "TDPlay OS extension" }), " docks Instagram in the side panel instead."]));
         main.appendChild(box);
       }
       function loading(msg) { return TD.h("div", { "class": "empty", text: msg || "Loading…" }); }
