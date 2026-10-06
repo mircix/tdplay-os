@@ -142,7 +142,22 @@ the first time a visitor on Chrome clicks Instagram, they get Add to Chrome → 
 Chrome cannot install an extension without that confirmation — no website can, by design since 2018 —
 so the card walks the visitor through it rather than pretending to install anything.
 
-## 5. Updating later
+## 5. Other browsers
+
+No browser lets a website install an extension by itself — Chrome removed that in 2018 and the rest never
+had it. Every route below ends with the person pressing *Add* in their own browser's dialog. What differs
+is how many of them can reach it at all:
+
+| Browser | What's possible |
+| --- | --- |
+| **Chrome** | The listing above. The OS's card does the rest. |
+| **Edge** | Same zip, nothing to change — Edge is Chromium and has the same `sidePanel` API. Either publish it free at [partner.microsoft.com/dashboard/microsoftedge](https://partner.microsoft.com/dashboard/microsoftedge) (no fee, separate review), or leave it: Edge installs from the Chrome Web Store once the visitor allows extensions from other stores. |
+| **Firefox** | A port, not a repackage. Firefox has no `sidePanel` — it has `sidebarAction`, which opens differently — and its `declarativeNetRequest` doesn't cover the header rewriting this needs, so that part would move to blocking `webRequest`. Worth doing only if Firefox visitors show up. |
+| **Safari** | Not realistic. Safari has no sidebar API for extensions at all, and extensions ship inside a Mac app through the App Store. |
+
+Everyone else keeps the pop-up window, which needs nothing installed.
+
+## 6. Updating later
 
 Bump the version, pack, upload the new zip over the same item:
 

@@ -69,6 +69,7 @@ function openPath(path) {
 [].forEach.call(document.querySelectorAll("button[data-go]"), function (b) {
   b.addEventListener("click", function () { go(IG + b.dataset.go, b); });
 });
+document.getElementById("ig").addEventListener("click", function () { openPath(""); });
 document.getElementById("reload").addEventListener("click", function () { nav(f.getAttribute("src") || IG); });
 document.getElementById("tdplay").addEventListener("click", function () {
   go((f.getAttribute("src") || "").indexOf("tdplay-os") > -1 ? IG : OS, null);
