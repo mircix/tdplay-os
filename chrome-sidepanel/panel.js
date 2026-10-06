@@ -18,8 +18,19 @@ var FRAMEABLE = {
 var ready = chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [FRAMEABLE.id], addRules: [FRAMEABLE] })
   .catch(function (e) { console.error("Instagram side panel: couldn't add the framing rule", e); });
 
+// Asking for the page the frame is already pointed at has to land you back on it even when you've browsed
+// deeper inside the panel (a profile, a reel, a search). Navigating the frame itself does that without
+// piling up history — a cross-origin frame can still be sent somewhere, it just can't be read.
+function nav(url) {
+  if (f.getAttribute("src") === url) {
+    try { f.contentWindow.location.replace(url); return; } catch (e) { }
+    f.removeAttribute("src");                                   // last resort: let the assignment below load it fresh
+  }
+  f.src = url;
+}
+
 function go(url, btn) {
-  ready.then(function () { f.src = url; });
+  ready.then(function () { nav(url); });
   [].forEach.call(document.querySelectorAll(".bar button[data-go]"), function (b) { b.classList.toggle("on", b === btn); });
   document.getElementById("tdplay").classList.toggle("on", url === OS);
 }
@@ -33,17 +44,35 @@ function openPath(path) {
 [].forEach.call(document.querySelectorAll("button[data-go]"), function (b) {
   b.addEventListener("click", function () { go(IG + b.dataset.go, b); });
 });
-document.getElementById("reload").addEventListener("click", function () { f.src = f.src; });
+document.getElementById("reload").addEventListener("click", function () { nav(f.getAttribute("src") || IG); });
 document.getElementById("tdplay").addEventListener("click", function () {
-  go(f.src.indexOf("tdplay-os") > -1 ? IG : OS, null);
+  go((f.getAttribute("src") || "").indexOf("tdplay-os") > -1 ? IG : OS, null);
 });
 
 // Instagram clicked in TDPlay OS (sw.js stores the request): a fresh one on opening, or any while open
 var win = chrome.windows.getCurrent().then(function (w) { return w.id; }, function () { return null; });
 function forMe(g, wid) { return g && (g.windowId == null || wid == null || g.windowId === wid); }
-Promise.all([win, chrome.storage.session.get("go")]).then(function (r) {
-  var g = r[1].go;
-  if (forMe(g, r[0]) && Date.now() - g.at < 10000) openPath(g.path); else openPath("");
+function onTDPlayOS() { return (f.getAttribute("src") || "").indexOf("tdplay-os") > -1; }
+
+// Opening the panel starts at Home — unless TDPlay OS just asked for somewhere in particular.
+function opened() {
+  Promise.all([win, chrome.storage.session.get("go")]).then(function (r) {
+    var g = r[1].go;
+    if (forMe(g, r[0]) && Date.now() - g.at < 10000) openPath(g.path); else openPath("");
+  });
+}
+opened();
+
+// Chrome usually rebuilds this page each time the panel opens, which runs the line above. When it keeps the
+// page instead, the panel comes back exactly where it was left — three profiles deep from last time. So treat
+// coming back after a long while away as a fresh open too; a quick switch away and back keeps your place.
+var hiddenAt = 0;
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState !== "visible") { hiddenAt = Date.now(); return; }
+  var away = Date.now() - hiddenAt;
+  if (!hiddenAt || away < 300000 || onTDPlayOS()) return;      // 5 minutes
+  hiddenAt = 0;
+  opened();
 });
 chrome.storage.onChanged.addListener(function (ch, area) {
   if (area !== "session" || !ch.go || !ch.go.newValue) return;

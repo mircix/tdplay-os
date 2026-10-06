@@ -42,4 +42,6 @@ get *Add to Chrome* → Chrome's own confirmation → the card notices the insta
 - Updating: after pulling a new version, press the ⟳ on the extension's card in `chrome://extensions`.
   Coming from 1.0 / 1.1, **Remove** it and **Load unpacked** again instead: since 1.2 the extension has a
   fixed ID (the `key` in `manifest.json`), which is how TDPlay OS finds it.
+- Opening the panel starts at Instagram **Home**, wherever you left it last — unless TDPlay OS asked for a
+  particular page (Reels, a profile), which it then opens instead.
 - TDPlay OS leaves full screen when it opens the panel — Chrome hides the side panel in full screen.
