@@ -15,8 +15,30 @@ var FRAMEABLE = {
   },
   condition: { requestDomains: ["instagram.com"], resourceTypes: ["sub_frame"], tabIds: [-1] }   // -1 = chrome.tabs.TAB_ID_NONE
 };
-var ready = chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [FRAMEABLE.id], addRules: [FRAMEABLE] })
-  .catch(function (e) { console.error("Instagram side panel: couldn't add the framing rule", e); });
+// Instagram also answers a *framed* request differently from a tab's: its "Sorry, this page isn't
+// available" screen, which is why its own in-page links work and our load of the same address doesn't.
+// So the panel's requests say what they are to the person reading them — a normal visit to instagram.com.
+var ASNAV = {
+  id: 2,
+  priority: 1,
+  action: {
+    type: "modifyHeaders",
+    requestHeaders: [
+      { header: "referer", operation: "set", value: IG },
+      { header: "sec-fetch-site", operation: "set", value: "same-origin" },
+      { header: "sec-fetch-dest", operation: "set", value: "document" },
+      { header: "sec-fetch-mode", operation: "set", value: "navigate" },
+      { header: "sec-fetch-user", operation: "set", value: "?1" }
+    ]
+  },
+  condition: { requestDomains: ["instagram.com"], resourceTypes: ["sub_frame"], tabIds: [-1] }
+};
+function rule(r, what) {
+  return chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [r.id], addRules: [r] })
+    .catch(function (e) { console.error("Instagram side panel: couldn't add the " + what + " rule", e); });
+}
+// separately, so one being refused can't take the other down with it
+var ready = Promise.all([rule(FRAMEABLE, "framing"), rule(ASNAV, "navigation")]);
 
 // Asking for the page the frame is already pointed at has to land you back on it even when you've browsed
 // deeper inside the panel (a profile, a reel, a search). Navigating the frame itself does that without
@@ -29,7 +51,7 @@ function nav(url) {
   f.src = url;
 }
 
-var fix = document.getElementById("fix");
+var fix = document.getElementById("fix"), fixMsg = document.getElementById("fix-msg"), fixBtns = document.getElementById("fix-btns");
 
 function go(url, btn) {
   fix.hidden = true;
@@ -87,6 +109,8 @@ chrome.storage.onChanged.addListener(function (ch, area) {
 // same address renders it, so do that once; if the same page comes back wrong, say so instead of looping.
 var retried = {};
 function fixBar(where) {
+  fixMsg.textContent = "Instagram keeps showing its \u201cpage isn\u2019t available\u201d screen for this one. ";
+  fixBtns.hidden = false;
   fix.hidden = false;
   document.getElementById("fix-reload").onclick = function () { retried[where] = 0; openPath(where); };
   document.getElementById("fix-tab").onclick = function () {
@@ -94,10 +118,28 @@ function fixBar(where) {
     fix.hidden = true;
   };
 }
+var watching = false;
 chrome.runtime.onMessage.addListener(function (msg) {
+  if (msg && msg.igAlive) { watching = true; console.log("TDPlay panel: the Instagram frame is being watched (" + msg.igAlive + ")"); return; }
   if (!msg || typeof msg.igError !== "string") return;
   var where = msg.igError, now = Date.now();
   if (retried[where] && now - retried[where] < 60000) { fixBar(where); return; }
   retried[where] = now;
   openPath(where);
+});
+
+// If nothing inside the frame ever reports in, Chrome isn't running recover.js there and nothing can notice
+// Instagram's not-available screen for you. Say so once, quietly, rather than leaving you waiting for a
+// reload that will never come.
+f.addEventListener("load", function () {
+  setTimeout(function () {
+    if (watching || fix.hidden === false || !/instagram\.com/.test(f.getAttribute("src") || "")) return;
+    console.log("TDPlay panel: no reply from inside the Instagram frame \u2014 automatic reloading is off here");
+    if (localStorage.getItem("tdos-watchless") === "1") return;
+    try { localStorage.setItem("tdos-watchless", "1"); } catch (e) { }
+    fixMsg.textContent = "If a page here says it isn't available, press \u27f3 \u2014 it usually loads on the second go.";
+    fixBtns.hidden = true;
+    fix.hidden = false;
+    setTimeout(function () { fix.hidden = true; }, 12000);
+  }, 6000);
 });

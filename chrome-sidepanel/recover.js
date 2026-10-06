@@ -12,6 +12,8 @@
     return /isn.t available/i.test(t) && /link you followed/i.test(t);   // both lines, so a caption can't trip it
   }
 
+  try { chrome.runtime.sendMessage({ igAlive: location.pathname }); } catch (e) { }   // the panel notes we're here
+
   var reported = "";
   setInterval(function () {
     var where = location.pathname + location.search;

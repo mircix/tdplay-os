@@ -79,7 +79,7 @@ Show instagram.com in Chrome's side panel, docked beside the page you're browsin
 | Permission | Justification |
 | --- | --- |
 | `sidePanel` | The extension's only interface is the side panel it opens. |
-| `declarativeNetRequestWithHostAccess` | Instagram's X-Frame-Options / CSP headers stop it rendering in the panel. One session rule removes those headers for instagram.com sub-frames that belong to no tab — the side panel. Instagram keeps its protection in ordinary tabs and on every website. |
+| `declarativeNetRequestWithHostAccess` | Two session rules, both limited to instagram.com sub-frames that belong to no tab — the side panel. One removes the X-Frame-Options / CSP headers that stop Instagram rendering there. The other sets the request's `Referer` and `Sec-Fetch-*` headers to those of an ordinary visit to instagram.com, because Instagram serves its “this page isn't available” screen to a cross-site frame request. Instagram keeps its protection in ordinary tabs and on every website. |
 | `storage` | One value in `chrome.storage.session`: the Instagram path the panel should open when the user clicks Instagram in TDPlay OS. Cleared when Chrome closes. |
 | Host access to `https://*.instagram.com/*` | The panel shows instagram.com, and the header rule applies to it. |
 | Content script on `https://*.instagram.com/*` (`recover.js`) | Instagram's own app sometimes renders its “this page isn't available” screen for a page that loads fine in a tab. The script reports that to the panel, which reloads the address properly. It reads nothing else, sends nothing anywhere, and returns immediately unless the page is in a frame. |
@@ -103,7 +103,10 @@ https://mircix.github.io/tdplay-os/extension-privacy.html
 ```
 The item exists because instagram.com cannot be framed. The single declarativeNetRequest session rule
 removes framing/isolation headers only for instagram.com sub-frame requests with tabId -1
-(TAB_ID_NONE), i.e. requests made by the extension's own side panel. Requests in real tabs are
+(TAB_ID_NONE), i.e. requests made by the extension's own side panel. A second rule, under the same
+condition, sets Referer and the Sec-Fetch-* headers on those requests to what an ordinary visit to
+instagram.com sends, because Instagram answers a cross-site frame request with its "this page isn't
+available" screen; the panel shows the user's own Instagram, so that is what the request represents. Requests in real tabs are
 untouched, so no website can frame Instagram because this is installed. The rule is a session rule
 added by the panel page when it opens, not a static ruleset, so it does not exist while the panel
 is closed. Source: github.com/mircix/tdplay-os/tree/main/chrome-sidepanel (panel.js).

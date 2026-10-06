@@ -6,7 +6,9 @@ clicking Instagram anywhere in TDPlay OS opens it here instead of in a pop-up wi
 
 Instagram refuses to be shown inside another page (`X-Frame-Options: DENY`), which no website can
 override. An extension can: this one removes that header **only for its own panel** — frames that belong
-to no browser tab — so instagram.com stays unframeable on every website you visit.
+to no browser tab — so instagram.com stays unframeable on every website you visit. The same panel-only rule
+also makes the request's `Referer` and `Sec-Fetch-*` headers those of an ordinary visit, because Instagram
+answers a cross-site frame request with “Sorry, this page isn't available” even when the page is fine.
 
 ## Install
 
