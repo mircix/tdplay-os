@@ -20,85 +20,6 @@
     back: TD.icons.back
   };
 
-  // ---------------------------------------------------------------- always-on-top floater
-  // Document Picture-in-Picture gives us a window that floats above every other app. It can only hold our
-  // own content (instagram.com still refuses to be framed), so it carries the OS's own Instagram view:
-  // @mitch_tdp's profile and posts, live from the API.
-  var floatWin = null;
-  TD.igFloat = function () {
-    if (floatWin && !floatWin.closed) { try { floatWin.focus(); } catch (e) { } return; }
-    if (!window.documentPictureInPicture) {
-      TD.notify("Floating window", "This browser can't float a window on top — it needs Chrome, Edge or Opera 102+.", { icon: TD.icons.instagram, ms: 5000 });
-      return;
-    }
-    documentPictureInPicture.requestWindow({ width: 420, height: 780 }).then(function (w) {
-      floatWin = w;
-      var d = w.document;
-      d.title = "TDPlay · Instagram";
-      [new URL("css/os.css", location.href).href,
-       "https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      ].forEach(function (href) { var l = d.createElement("link"); l.rel = "stylesheet"; l.href = href; d.head.appendChild(l); });
-      var st = d.createElement("style");
-      st.textContent = "html,body{margin:0;height:100%;background:#07070c;color:#fff;font:15px/1.45 var(--body);overflow:hidden}" +
-        ".igf{display:flex;flex-direction:column;height:100%}" +
-        ".igf-bar{flex:none;display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.25)}" +
-        ".igf-bar b{font-family:var(--head);font-size:15px;letter-spacing:.04em;flex:1;min-width:0}" +
-        ".igf-body{flex:1;min-height:0;overflow:auto;padding:14px}" +
-        ".igf .ig-head{gap:14px;padding:0 0 14px}.igf .ig-avatar{width:72px;height:72px}.igf .ig-name b{font-size:20px}" +
-        ".igf .ig-counts{gap:12px;font-size:13px}.igf .ig-grid{gap:3px}";
-      d.head.appendChild(st);
-      var root = TD.h("div", { "class": "igf" });
-      var body = TD.h("div", { "class": "igf-body" }, [TD.h("div", { "class": "empty", text: "Loading…" })]);
-      var bar = TD.h("div", { "class": "igf-bar" }, [
-        TD.h("span", { html: IGLOGO(20) }),
-        TD.h("b", { text: "@" + OWNER }),
-        TD.h("button", { "class": "btn sm", title: "Refresh", html: TD.icons.reload, onclick: function () { fill(body, true); } }),
-        TD.h("button", { "class": "btn sm", html: TD.icons.ext + " Instagram", title: "Open the real Instagram", onclick: function () { phone(""); } })
-      ]);
-      root.appendChild(bar); root.appendChild(body);
-      d.body.appendChild(root);
-      fill(body);
-      w.addEventListener("pagehide", function () { floatWin = null; });
-    }).catch(function (e) { TD.notify("Floating window", e.message || "The browser wouldn't open it.", { icon: TD.icons.instagram }); });
-  };
-  function fill(body, force) {
-    var IG = TD.ig;
-    TD.clear(body); body.appendChild(TD.h("div", { "class": "empty", text: "Loading…" }));
-    if (!IG.configured()) {
-      TD.clear(body);
-      body.appendChild(TD.h("div", { "class": "empty", html: "<b>Instagram isn't connected on this TDPlay OS yet.</b>" }));
-      return;
-    }
-    Promise.all([IG.me(), IG.media()]).then(function (r) {
-      var P = r[0], media = (r[1] && r[1].data) || [];
-      TD.clear(body);
-      body.appendChild(TD.h("div", { "class": "ig-head" }, [
-        TD.h("div", { "class": "ig-avatar", style: P.profile_picture_url ? "background-image:url(" + P.profile_picture_url + ")" : "" }),
-        TD.h("div", { "class": "ig-who" }, [
-          TD.h("div", { "class": "ig-name" }, [TD.h("b", { text: P.name || P.username }), TD.h("span", { "class": "muted", text: "@" + P.username })]),
-          TD.h("div", { "class": "ig-counts" }, [
-            TD.h("span", { html: "<b>" + IG.fmtCount(P.media_count) + "</b> posts" }),
-            TD.h("span", { html: "<b>" + IG.fmtCount(P.followers_count) + "</b> followers" })]),
-          P.biography ? TD.h("div", { "class": "ig-bio", style: "font-size:13px", text: P.biography }) : null
-        ])
-      ]));
-      var g = TD.h("div", { "class": "ig-grid" });
-      media.forEach(function (m) {
-        var th = m.media_type === "VIDEO" ? (m.thumbnail_url || m.media_url) : m.media_url;
-        g.appendChild(TD.h("div", { "class": "ig-cell", title: (m.caption || "").slice(0, 120), style: th ? "background-image:url(" + th + ")" : "", onclick: function () { phone(m.permalink.replace(/^https?:\/\/(www\.)?instagram\.com\//, "")); } }, [
-          m.media_type === "VIDEO" ? TD.h("span", { "class": "ig-badge", html: GLYPH.video }) : m.media_type === "CAROUSEL_ALBUM" ? TD.h("span", { "class": "ig-badge", html: GLYPH.album }) : null,
-          TD.h("div", { "class": "ig-hover" }, [
-            m.like_count != null ? TD.h("span", { html: GLYPH.heart + " " + IG.fmtCount(m.like_count) }) : null,
-            m.comments_count != null ? TD.h("span", { html: GLYPH.comment + " " + IG.fmtCount(m.comments_count) }) : null])
-        ]));
-      });
-      body.appendChild(g);
-    }).catch(function (e) {
-      TD.clear(body);
-      body.appendChild(TD.h("div", { "class": "empty", html: "<b>Couldn't load</b><br>" + TD.esc(e.message) }));
-    });
-  }
-
   // Instagram's profile embed in a portrait window — the fallback for personal accounts
   TD.register({
     id: "igprofile", name: "Instagram", desc: "", icon: TD.icons.instagram, hidden: true, single: false, width: 420, height: 560, minWidth: 340, minHeight: 480,
@@ -174,7 +95,6 @@
             P.website ? TD.h("a", { "class": "ig-site", href: P.website, target: "_blank", rel: "noopener", text: TD.domain(P.website) || P.website }) : null,
             TD.h("div", { "class": "pill-row", style: "margin-top:10px" }, [
               TD.h("button", { "class": "btn sm", html: TD.icons.ext + " Open on Instagram", onclick: function () { TD.phoneWindow("https://www.instagram.com/" + h + "/", "ig-" + h); } }),
-              h === OWNER ? TD.h("button", { "class": "btn sm", title: "A small window that floats above your other apps", html: TD.svg('<path d="M4 5h16v10H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 12h6v6h-6z" fill="currentColor"/>') + " Float on top", onclick: function () { TD.igFloat(); } }) : null,
               A ? TD.h("button", { "class": "btn sm primary", html: TD.icons.play + " Play their songs", onclick: function () { TD.player.play(A.items, 0, { label: A.name }); } }) : null,
               A ? TD.h("button", { "class": "btn sm", html: TD.icons.artists.replace("<svg", '<svg style="width:16px;height:16px"') + " Artist card", onclick: function () { TD.open("artists", { artist: A.key }); } }) : null
             ])
@@ -281,9 +201,7 @@
           TD.h("div", { "class": "t" }, [
             TD.h("b", { text: "Your Instagram" }),
             TD.h("span", { text: "Home feed, stories, search, messages — the real Instagram, signed in as you, in a phone-sized window." }),
-            TD.h("div", { "class": "sp-ctl" }, [
-              TD.h("button", { "class": "btn primary", html: IGLOGO(18) + " Open Instagram", onclick: function (e) { e.stopPropagation(); phone(""); } }),
-              TD.h("button", { "class": "btn", title: "A small window that floats above your other apps", html: TD.svg('<path d="M4 5h16v10H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 12h6v6h-6z" fill="currentColor"/>') + " Float on top", onclick: function (e) { e.stopPropagation(); TD.igFloat(); } })])
+            TD.h("div", { "class": "sp-ctl" }, [TD.h("button", { "class": "btn primary", html: IGLOGO(18) + " Open Instagram", onclick: function (e) { e.stopPropagation(); phone(""); } })])
           ])]));
         var shortcuts = [["Home feed", "", TD.icons.home], ["Reels", "reels/", TD.icons.player], ["Explore", "explore/", TD.icons.browser], ["Messages", "direct/inbox/", TD.icons.keepup], ["Notifications", "notifications/", TD.icons.radio], ["@mitch_tdp", OWNER + "/", TD.icons.about]];
         var g = TD.h("div", { "class": "folders", style: "grid-template-columns:repeat(auto-fill,minmax(170px,1fr))" });
