@@ -34,7 +34,8 @@ export default {
       if (p === "/status") {
         const a = await getAuth(env), fb = await getFb(env);
         return json({ connected: !!a, username: a && a.username, expires_at: a && a.expires_at, token_set: !!env.IG_TOKEN,
-          artists: !!fb, page: fb && fb.page, ig_user_id: fb && fb.ig_user_id, bootstrap_error: LAST_ERR || null }, cors);
+          artists: !!fb, page: fb && fb.page, ig_user_id: fb && fb.ig_user_id,
+          bootstrap_error: LAST_ERR || null, artists_error: fb ? null : FB_ERR }, cors);
       }
       const auth = await getAuth(env);
       if (!auth) return json({ error: "not_connected", message: "The owner hasn't connected Instagram yet." }, cors, 503);
@@ -163,8 +164,22 @@ async function fbCallback(url, env) {
 }
 async function getFb(env) {
   const v = await env.IG_KV.get("fb");
-  return v ? JSON.parse(v) : null;
+  if (v) return JSON.parse(v);
+  // Simplest route: paste a Page access token (Graph API Explorer -> Get Page Access Token) as FB_PAGE_TOKEN.
+  // A page token made from a long-lived user token never expires, so there is nothing to refresh.
+  if (env.FB_PAGE_TOKEN) {
+    const me = await fbGraph("/me?fields=name,instagram_business_account{id,username}", env.FB_PAGE_TOKEN.trim());
+    if (me && me.instagram_business_account) {
+      const fb = { token: env.FB_PAGE_TOKEN.trim(), page: me.name, page_id: me.id, ig_user_id: me.instagram_business_account.id, ig_username: me.instagram_business_account.username, saved_at: Date.now() };
+      await env.IG_KV.put("fb", JSON.stringify(fb));
+      FB_ERR = null;
+      return fb;
+    }
+    FB_ERR = (me && me.error && me.error.message) || "that token has no Instagram account attached — is it the Page's token, and is the Page linked to @mitch_tdp?";
+  }
+  return null;
 }
+let FB_ERR = null;
 async function fbGraph(path, token) {
   const sep = path.includes("?") ? "&" : "?";
   return fetch(`${FB}${path}${sep}access_token=${encodeURIComponent(token)}`).then(r => r.json());

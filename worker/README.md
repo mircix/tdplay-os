@@ -34,7 +34,17 @@ With this you can skip the redirect URI / `/auth/start` steps entirely.
 ## Artist look-ups (Business Discovery)
 
 Looking up *other* Instagram accounts needs Meta's **Facebook login**, not the Instagram one, and a Facebook
-Page linked to @mitch_tdp. One-time:
+Page linked to @mitch_tdp.
+
+**Easiest route — paste a Page token.** [Graph API Explorer](https://developers.facebook.com/tools/explorer/)
+→ app *TDPlay OS* → add the permissions `instagram_basic`, `instagram_manage_insights`, `pages_show_list`,
+`pages_read_engagement` → **Generate Access Token** → approve → open the
+[Access Token Tool](https://developers.facebook.com/tools/accesstoken/) and **Extend** the user token (so what
+follows never expires) → back in the Explorer pick **Get Token → Get Page Access Token** → choose the TDPlay
+Page → copy it into the worker as the secret **`FB_PAGE_TOKEN`**. The worker finds the linked Instagram
+account itself; `GET /status` then shows `artists: true`.
+
+**Or the full OAuth route** (the worker does the exchanges):
 
 1. Meta app → **App settings → Basic**: copy the **App ID** and **App secret** (click *Show*).
 2. Cloudflare worker → *Settings → Variables and Secrets*: add secrets **`FB_APP_ID`** and **`FB_APP_SECRET`**.
