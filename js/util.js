@@ -196,8 +196,8 @@ window.TD = window.TD || {};
 
   TD.openSidePanel = function (path) {                        // "" | "reels/" | "mitch_tdp/" | "p/<id>/"
     if (!TD.sidePanel || !spId) return false;
-    // Chrome hides the side panel while the page is full screen
-    if (document.fullscreenElement || document.webkitFullscreenElement) try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { }
+    // Full screen stays as it is: the side panel sits beside a window the browser itself put full screen,
+    // and leaving it for Instagram was worse than the panel being briefly out of sight.
     spSend(spId, { instagram: path || "" }, function (r) {
       if (!r || !r.ok) TD.notify("Instagram side panel", "Chrome didn't open it — click the TDPlay OS button in the toolbar.", { icon: TD.icons.instagram, ms: 5000 });
     });

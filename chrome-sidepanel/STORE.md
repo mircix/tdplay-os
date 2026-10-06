@@ -82,6 +82,7 @@ Show instagram.com in Chrome's side panel, docked beside the page you're browsin
 | `declarativeNetRequestWithHostAccess` | Instagram's X-Frame-Options / CSP headers stop it rendering in the panel. One session rule removes those headers for instagram.com sub-frames that belong to no tab — the side panel. Instagram keeps its protection in ordinary tabs and on every website. |
 | `storage` | One value in `chrome.storage.session`: the Instagram path the panel should open when the user clicks Instagram in TDPlay OS. Cleared when Chrome closes. |
 | Host access to `https://*.instagram.com/*` | The panel shows instagram.com, and the header rule applies to it. |
+| Content script on `https://*.instagram.com/*` (`recover.js`) | Instagram's own app sometimes renders its “this page isn't available” screen for a page that loads fine in a tab. The script reports that to the panel, which reloads the address properly. It reads nothing else, sends nothing anywhere, and returns immediately unless the page is in a frame. |
 | Host access to `https://mircix.github.io/*` | TDPlay OS (hosted there) asks the extension whether it is installed and to open the panel on an Instagram page, via `externally_connectable`. |
 | Remote code | **No.** All code is in the package; nothing is fetched and executed. The panel only displays instagram.com in an iframe. |
 

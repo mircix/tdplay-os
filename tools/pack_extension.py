@@ -46,6 +46,8 @@ def main():
     named += list(manifest.get("icons", {}).values())
     for res in manifest.get("declarative_net_request", {}).get("rule_resources", []):
         named.append(res["path"])
+    for cs in manifest.get("content_scripts", []):
+        named += list(cs.get("js", [])) + list(cs.get("css", []))
     missing = [f for f in named if not os.path.exists(os.path.join(SRC, f))]
     if missing:
         sys.exit("manifest points at files that aren't there: %s" % ", ".join(missing))

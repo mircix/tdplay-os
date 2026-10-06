@@ -44,4 +44,7 @@ get *Add to Chrome* → Chrome's own confirmation → the card notices the insta
   fixed ID (the `key` in `manifest.json`), which is how TDPlay OS finds it.
 - Opening the panel starts at Instagram **Home**, wherever you left it last — unless TDPlay OS asked for a
   particular page (Reels, a profile), which it then opens instead.
-- TDPlay OS leaves full screen when it opens the panel — Chrome hides the side panel in full screen.
+- If Instagram's app lands on “Sorry, this page isn't available” for a page that is fine, `recover.js`
+  notices from inside the frame and the panel loads that address properly. If the same page comes back
+  wrong, a small bar offers **Try again** and **Open in a tab** rather than reloading forever.
+- Full screen is left alone — the panel shows beside a window the browser put full screen itself.

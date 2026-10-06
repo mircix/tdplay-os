@@ -29,7 +29,10 @@ function nav(url) {
   f.src = url;
 }
 
+var fix = document.getElementById("fix");
+
 function go(url, btn) {
+  fix.hidden = true;
   ready.then(function () { nav(url); });
   [].forEach.call(document.querySelectorAll(".bar button[data-go]"), function (b) { b.classList.toggle("on", b === btn); });
   document.getElementById("tdplay").classList.toggle("on", url === OS);
@@ -77,4 +80,24 @@ document.addEventListener("visibilitychange", function () {
 chrome.storage.onChanged.addListener(function (ch, area) {
   if (area !== "session" || !ch.go || !ch.go.newValue) return;
   win.then(function (wid) { if (forMe(ch.go.newValue, wid)) openPath(ch.go.newValue.path); });
+});
+
+// recover.js reports from inside the frame when Instagram's app lands on "Sorry, this page isn't available"
+// — which it does to pages that are perfectly fine, including a tap in its own bottom bar. A real load of the
+// same address renders it, so do that once; if the same page comes back wrong, say so instead of looping.
+var retried = {};
+function fixBar(where) {
+  fix.hidden = false;
+  document.getElementById("fix-reload").onclick = function () { retried[where] = 0; openPath(where); };
+  document.getElementById("fix-tab").onclick = function () {
+    try { chrome.tabs.create({ url: new URL(where, IG).href }); } catch (e) { }
+    fix.hidden = true;
+  };
+}
+chrome.runtime.onMessage.addListener(function (msg) {
+  if (!msg || typeof msg.igError !== "string") return;
+  var where = msg.igError, now = Date.now();
+  if (retried[where] && now - retried[where] < 60000) { fixBar(where); return; }
+  retried[where] = now;
+  openPath(where);
 });

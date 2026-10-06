@@ -15,9 +15,13 @@
   .bar button.on { background: #ff2b2b; border-color: transparent; color: #0a0a0f; font-weight: 600; }
   .bar .sp { flex: 1; }
   iframe { display: block; width: 100%; height: calc(100% - 35px); border: 0; background: #000; }
-  .note { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 10px; font-size: 12px;
-    color: #9a9aa8; background: rgba(16,16,24,.96); border-top: 1px solid rgba(255,255,255,.1); }
+  .note { position: absolute; left: 0; right: 0; bottom: 0; padding: 9px 10px; font-size: 12px;
+    color: #c8c8d4; background: rgba(16,16,24,.98); border-top: 1px solid rgba(255,255,255,.1); }
   .note a { color: #b1ffff; }
+  .note[hidden] { display: none; }
+  .note button { margin: 6px 6px 0 0; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.16);
+    color: #fff; border-radius: 7px; padding: 4px 9px; font: inherit; cursor: pointer; }
+  .note button:hover { background: rgba(255,255,255,.2); }
 </style>
 </head>
 <body>
@@ -32,6 +36,8 @@
   </div>
   <iframe id="f"
           allow="autoplay; encrypted-media; clipboard-write; picture-in-picture; fullscreen"></iframe>
+  <div class="note" id="fix" hidden>Instagram keeps showing its “page isn’t available” screen for this one.
+    <button id="fix-reload">Try again</button><button id="fix-tab">Open in a tab</button></div>
   <script src="panel.js"></script>
 </body>
 </html>
