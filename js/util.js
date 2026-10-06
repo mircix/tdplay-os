@@ -152,7 +152,6 @@ window.TD = window.TD || {};
   document.addEventListener("fullscreenchange", function () {
     if (!document.fullscreenElement) setTimeout(raisePhone, 250);      // bring Instagram back to the front
   });
-  window.addEventListener("focus", function () { if (phoneTookFs) setTimeout(raisePhone, 150); });
 
   TD.phoneWindow = function (url, name) {
     function open() {
@@ -162,7 +161,7 @@ window.TD = window.TD || {};
       var win = window.open(url, name || "tdos-phone", "popup=yes,width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",resizable=yes,scrollbars=yes");
       if (!win) { TD.notify("Pop-up blocked", "Allow pop-ups for TDPlay OS to open this in a phone window.", { ms: 4000 }); phoneTookFs = false; return win; }
       phoneWin = win; watchPhone();
-      [0, 150, 450, 1000].forEach(function (d) { setTimeout(raisePhone, d); });   // survive the space switch
+      [0, 120, 350, 700, 1200, 2000].forEach(function (d) { setTimeout(raisePhone, d); });   // survive the space switch
       // a window opened from a full-screen page can come up filling the screen — put it back to phone size
       setTimeout(function () {
         try {
@@ -177,10 +176,11 @@ window.TD = window.TD || {};
     var fs = document.fullscreenElement || document.webkitFullscreenElement;
     if (fs) {
       phoneTookFs = true;                                   // remember to put the OS back when it closes
-      var p;
+      // Opening during the full-screen exit puts the window behind the OS (macOS is still animating out of
+      // the full-screen space), so wait for the transition to finish — the click still counts for pop-ups.
+      var settle = function () { setTimeout(open, 850); }, p;
       try { p = (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { }
-      if (p && p.then) { p.then(open, open); return { deferred: true }; }
-      setTimeout(open, 60);
+      if (p && p.then) p.then(settle, settle); else settle();
       return { deferred: true };
     }
     return open();
