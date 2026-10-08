@@ -13,7 +13,7 @@
       TD.h("a", { href: "#", onclick: function (e) { e.preventDefault(); TD.sidePanelSetup(""); }, text: "set that up" }), " \u2014 one time, about twenty seconds."]);
     return TD.h("div", st, ["The Instagram icon in the dock opens this window directly. If nothing opens, your browser blocked the pop-up \u2014 allow pop-ups for TDPlay OS. On phones it opens as a new tab."]);
   }
-  function canOfferPanel() { return !TD.sidePanel && !!(window.TD_CONFIG && TD_CONFIG.sidePanelStoreUrl) && !!(window.chrome && chrome.runtime && chrome.runtime.sendMessage) && !TD.isMobile(); }
+  function canOfferPanel() { return !TD.sidePanel && (TD.sidePanelInstallable() || !!TD.store.get("sidePanelNo", false)); }
   function igSearchUrl(q) { return IG + "explore/search/keyword/?q=" + encodeURIComponent(q); }
   function handle(url) { try { return (new URL(url).pathname.split("/").filter(Boolean)[0] || "").toLowerCase(); } catch (e) { return ""; } }
   function embedUrl(url) {

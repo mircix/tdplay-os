@@ -205,8 +205,10 @@ window.TD = window.TD || {};
 
   // Worth offering the one-time install? A Chromium browser on a computer, not installed, not refused.
   function chromium() { var ua = navigator.userAgent; return /Chrome\/|Chromium\/|Edg\//.test(ua) && !/Mobile|Android/.test(ua); }
+  // Not canTalk(): chrome.runtime only exists on this page once some extension has said it may, so requiring
+  // it would hide the install card from exactly the people who haven't installed anything yet.
   TD.sidePanelInstallable = function () {
-    return !!(chromium() && canTalk() && !TD.sidePanel && !TD.isMobile() && !TD.store.get("sidePanelNo", false));
+    return !!(chromium() && !TD.sidePanel && !TD.isMobile() && !TD.store.get("sidePanelNo", false));
   };
 
   TD.openSidePanel = function (path) {                        // "" | "reels/" | "mitch_tdp/" | "p/<id>/"
