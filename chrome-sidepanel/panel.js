@@ -70,6 +70,30 @@ function openPath(path) {
   b.addEventListener("click", function () { go(IG + b.dataset.go, b); });
 });
 document.getElementById("ig").addEventListener("click", function () { openPath(""); });
+
+// Full screen. A side panel is browser furniture, so the Fullscreen API may refuse it outright; when it
+// does, Instagram goes full screen the other way — its own window, no tabs and no address bar.
+var fullBtn = document.getElementById("full");
+var OUT = '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>';      // arrows pointing out: go full screen
+var IN = '<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>';       // arrows pointing in: come back
+function fullMark(on) {
+  fullBtn.classList.toggle("on", !!on);
+  fullBtn.title = on ? "Leave full screen" : "Full screen";
+  fullBtn.querySelector("svg").innerHTML = on ? IN : OUT;
+}
+function ownWindow() {
+  var url = f.getAttribute("src") || IG;
+  if (url.indexOf("tdplay-os") > -1) url = OS;                       // whichever the panel is showing
+  try { chrome.windows.create({ url: url, type: "popup", state: "fullscreen" }); } catch (e) { }
+}
+fullBtn.addEventListener("click", function () {
+  if (document.fullscreenElement) { document.exitFullscreen(); return; }
+  var p;
+  try { p = document.documentElement.requestFullscreen({ navigationUI: "hide" }); } catch (e) { p = null; }
+  if (p && p.then) p.then(function () { fullMark(true); }, ownWindow); else if (!p) ownWindow();
+});
+document.addEventListener("fullscreenchange", function () { fullMark(!!document.fullscreenElement); });
+
 document.getElementById("reload").addEventListener("click", function () { nav(f.getAttribute("src") || IG); });
 document.getElementById("tdplay").addEventListener("click", function () {
   go((f.getAttribute("src") || "").indexOf("tdplay-os") > -1 ? IG : OS, null);

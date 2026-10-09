@@ -47,6 +47,9 @@ get *Add to Chrome* → Chrome's own confirmation → the card notices the insta
 - Clicking Instagram in TDPlay OS opens the panel through `bridge.js`, which the extension puts into the
   OS's own pages — so no extension id has to match, but the OS page has to be **reloaded** after you
   install or reload the extension (content scripts only reach pages loaded afterwards).
+- The ⤢ button beside **TDPlay OS** goes full screen. A side panel is browser furniture, so Chrome may
+  refuse the Fullscreen API there; when it does, the button opens whatever the panel is showing as its
+  own full-screen window instead — no tabs, no address bar. Press it again, or Esc, to come back.
 - Opening the panel starts at Instagram **Home**, wherever you left it last — unless TDPlay OS asked for a
   particular page (Reels, a profile), which it then opens instead.
 - If Instagram's app lands on “Sorry, this page isn't available” for a page that is fine, `recover.js`

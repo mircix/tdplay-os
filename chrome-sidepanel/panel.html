@@ -7,15 +7,18 @@
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #07070c; color: #fff;
     font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
-  .bar { display: flex; gap: 4px; align-items: center; padding: 6px 8px; background: rgba(16,16,24,.98);
+  .bar { display: flex; gap: 3px; align-items: center; padding: 6px 6px; background: rgba(16,16,24,.98);
     border-bottom: 1px solid rgba(255,255,255,.1); overflow-x: auto; scrollbar-width: none; }
   .bar::-webkit-scrollbar { display: none; }
   .bar button { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); color: #fff;
-    border-radius: 8px; padding: 5px 8px; font: inherit; cursor: pointer; white-space: nowrap; flex: none; }
+    border-radius: 8px; padding: 5px 7px; font: inherit; cursor: pointer; white-space: nowrap; flex: none; }
   #ig { padding: 0; border: 0; background: none; line-height: 0; flex: none; }
   #ig svg { width: 22px; height: 22px; border-radius: 6px; display: block; }
   #ig:hover { background: none; transform: scale(1.08); }
   #ig:active { transform: scale(.96); }
+  #full { padding: 4px 6px; }
+  #full svg { width: 15px; height: 15px; display: block; fill: none; stroke: currentColor;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .bar button:hover { background: rgba(255,255,255,.16); }
   .bar button.on { background: #ff2b2b; border-color: transparent; color: #0a0a0f; font-weight: 600; }
   .bar .sp { flex: 1; }
@@ -38,6 +41,7 @@
     <button data-go="direct/inbox/">DMs</button>
     <span class="sp"></span>
     <button id="tdplay" title="TDPlay OS in the panel">TDPlay OS</button>
+    <button id="full" title="Full screen" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     <button id="reload" title="Reload">⟳</button>
   </div>
   <iframe id="f"
