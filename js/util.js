@@ -244,7 +244,12 @@ window.TD = window.TD || {};
     var title = TD.h("div", { "class": "dialog-title" });
     var body = TD.h("div", { "class": "dialog-body" });
     var btns = TD.h("div", { "class": "dialog-btns" });
-    var box = TD.h("div", { "class": "dialog glass" }, [icon, title, body, btns]);
+    var neverEl = TD.h("input", { type: "checkbox" });
+    var never = TD.h("label", { "class": "dialog-check" }, [neverEl, "Never show again"]);
+    neverEl.addEventListener("change", function () {
+      if (neverEl.checked) TD.store.set("sidePanelNo", true); else TD.store.del("sidePanelNo");
+    });
+    var box = TD.h("div", { "class": "dialog glass" }, [icon, title, body, never, btns]);
     var ov = TD.h("div", { "class": "dialog-ov" }, [box]);
     var timer = null, until = 0;
     function close() { clearInterval(timer); spCard = null; ov.classList.add("out"); setTimeout(function () { ov.remove(); }, 180); }
@@ -253,15 +258,13 @@ window.TD = window.TD || {};
       list.forEach(function (b) { if (b) btns.appendChild(TD.h("button", { "class": "btn" + (b.cls ? " " + b.cls : ""), text: b.label, onclick: b.fn })); });
       var first = btns.querySelector(".btn.gold") || btns.querySelector(".btn"); if (first) first.focus();
     }
-    function window_(decline) {
-      if (decline) TD.store.set("sidePanelNo", true);          // don't offer again; the app's menu still can
-      close(); TD.phoneWindowDirect(IGURL + path, "ig-phone");
-    }
+    // Opening a window is just this once \u2014 the card comes back next time unless "Never show again" is ticked.
+    function window_() { close(); TD.phoneWindowDirect(IGURL + path, "ig-phone"); }
     // An extension only reaches pages opened after it was installed, so a page that was already open has to
     // come back once before it can talk to the panel. Remember what was asked for across that reload.
     function reloadInto() { TD.store.set("spOpen", path); location.reload(); }
     function ready() {
-      clearInterval(timer);
+      clearInterval(timer); never.hidden = true;
       title.innerHTML = "Instagram is <em>ready</em>";
       if (bridged()) {
         body.innerHTML = "Installed. Instagram opens in the panel beside TDPlay OS from here on \u2014 the dock icon, Reels, Explore and DMs all land there.";
@@ -272,12 +275,13 @@ window.TD = window.TD || {};
       }
     }
     function waiting() {
+      never.hidden = true;
       title.innerHTML = "Installing <em>Instagram</em>";
       body.innerHTML = '<div class="sp-wait"><span class="sp-ring"></span>Waiting for your browser\u2026</div>' +
         "Press <b>Add to Chrome</b> in the tab that opened, then <b>Add extension</b> when it asks. This card notices on its own.";
       buttons([
         { label: "I've installed it", cls: "gold", fn: reloadInto },
-        { label: "Open in a window instead", fn: function () { window_(false); } }
+        { label: "Open in a window instead", fn: window_ }
       ]);
       until = Date.now() + 300000;
       clearInterval(timer);
@@ -287,6 +291,7 @@ window.TD = window.TD || {};
       }, 1500);
     }
     function start() {
+      never.hidden = false;
       var store = spStore();
       title.innerHTML = "Install Instagram <em>to continue</em>";
       body.innerHTML = "Instagram doesn't let other websites show it. The TDPlay OS panel puts the real thing in your browser's side panel, beside the OS \u2014 once, about twenty seconds." +
@@ -300,7 +305,7 @@ window.TD = window.TD || {};
         "It touches nothing but Instagram and TDPlay OS, and collects nothing.";
       buttons([
         { label: "Install Now", cls: "gold", fn: function () { window.open(store || HELP, "_blank", "noopener"); waiting(); } },
-        { label: "Open in a window", fn: function () { window_(true); } }
+        { label: "Open in a window", fn: window_ }
       ]);
     }
     ov.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
